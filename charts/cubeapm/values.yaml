@@ -1,0 +1,276 @@
+# Global override values
+global:
+  # -- Overrides the Image registry globally
+  imageRegistry: &GLOBAL_IMAGE_REGISTRY null
+  # -- Global Image Pull Secrets
+  imagePullSecrets: []
+  # -- Overrides the storage class for all PVC with persistence enabled.
+  # If not set, the default storage class is used.
+  # If set to "-", storageClassName: "", which disables dynamic provisioning
+  storageClass: null
+  # -- Kubernetes cluster cloud provider.
+  # example: `aws`, `azure`, `gcp`, `other`
+  # Based on the cloud, storage class for the persistent volume is selected.
+  # When set to 'aws' or 'gcp' along with `installCustomStorageClass` enabled,
+  # then new expandible storage class is created.
+  cloud: other
+
+# -- CubeAPM chart name override
+nameOverride: ""
+
+# -- CubeAPM chart full name override
+fullnameOverride: ""
+
+# -- Image Registry Secret Names for all CubeAPM components.
+# If global.imagePullSecrets is set as well, it will be merged.
+imagePullSecrets: []
+
+# -- When the `installCustomStorageClass` is enabled with `cloud` set as `gcp`
+# or `aws`. It creates custom storage class with volume expansion permission.
+installCustomStorageClass: false
+
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+priorityClassName: ""
+nodeSelector: {}
+affinity: {}
+tolerations: []
+topologySpreadConstraints: []
+podSecurityContext: {}
+
+securityContext: {}
+# -- Configure resource requests and limits. Update according to your workload.
+# Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+resources: {}
+
+image:
+  registry: docker.io
+  repository: cubeapm/cubeapm
+  tag: v1.1.0
+  pullPolicy: IfNotPresent
+
+configVars:
+  # -- [Required] URL used by users to access Cube APM. This is used to generate URLs in emails and alerts.
+  # If you use reverse proxy and sub path specify full url (with sub path).
+  # Examples: http://cube.yourdomain.com, https://yourdomain.com/cube, http://10.0.0.1:3125
+  baseUrl: https://cubeapm.yourdomain.com
+  # -- Minimal allowed log Level.
+  # Supported values are debug, info, warn, and error.
+  logLevel: "warn"
+  # -- (string) Delay before shutdown. During this delay, health check returns
+  # non-OK responses so load balancers can route new requests to other servers.
+  shutdownDelay: 0
+
+  alerting:
+    alertmanager:
+      # -- Prometheus Alertmanager URL to override in-built alertmanager, e.g. http://127.0.0.1:9093.
+      # List all Alertmanager URLs separated by comma if it is running in cluster mode.
+      urls: ""
+  auth:
+    database:
+      # -- [Required] URL of database for storing user accounts data
+      # Example:
+      #  mysql://<username>:<password>@tcp(<host>:3306)/<db_name>
+      #  postgres://<username>:<password>@<host>:5432/<db_name>?sslmode=disable
+      url: ""
+    key:
+      # -- [Required] Encryption key for session data. Must be 32 characters long.
+      # Can use hex encoded UUID without dashes.
+      session: ""
+      # -- [Required] Encryption key for tokens. Must be 32 characters long.
+      # Can use hex encoded UUID without dashes.
+      tokens: ""
+    smtp:
+      # -- Email address of sender. Your SMTP server must be
+      # configured to allow sending emails from this address.
+      from: cubeapm@yourdomain.com
+      # -- [Required] URL of SMTP server for sending emails
+      # Example:
+      #  smtp://<username>:<password>@<mailserver>:25/?skip_ssl_verify=false
+      url: ""
+    # -- Comma separated list of email ids of users to be given sysadmin privilege.
+    sysAdmins: ""
+
+  metrics:
+    # -- Metrics retention period. Must be between 24h0m0s and 1440h0m0s.
+    retention: 720h
+    # -- Metrics update interval. Must be between 500ms and 1m0s.
+    updateInterval: 15s
+  tracegen:
+    # -- Disable the built-in demo trace generator
+    disable: false
+  traces:
+    # -- Traces retention period. Must be between 1h0m0s and 720h0m0s.
+    retention: 168h
+
+service:
+  # -- Annotations to CubeAPM service
+  annotations: {}
+  # -- Service type
+  type: ClusterIP
+  # -- HTTP port
+  port: 3125
+
+ingress:
+  # -- Enable ingress for CubeAPM
+  enabled: true
+  # -- Ingress Class Name to be used to identify ingress controllers
+  className: ""
+  # -- Annotations to CubeAPM Ingress
+  annotations: {}
+  # -- CubeAPM Ingress Host names with their path details
+  hosts:
+    - host: cubeapm.yourdomain.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  # -- CubeAPM Ingress TLS
+  tls: []
+
+persistence:
+  # -- Enable data persistence using PVC. If not enabled, data is stored in an emptyDir.
+  enabled: true
+  # -- Name of an existing PVC to use (only when deploying a single pod)
+  existingClaim: ""
+  # -- Persistent Volume Storage Class to use.
+  # If defined, `storageClassName: <storageClass>`.
+  # If set to "-", `storageClassName: ""`, which disables dynamic provisioning
+  # If undefined (the default) or set to `null`, no storageClassName spec is
+  # set, choosing the default provisioner.
+  storageClass: null
+  # -- Access Modes for persistent volume
+  accessModes:
+    - ReadWriteOnce
+  # -- Persistent Volume size
+  size: 1Gi
+
+collector:
+  otlp:
+    grpc:
+      # -- Disable OTLP grpc receiver
+      disable: false
+      # -- Port to bind OTLP grpc receiver on
+      port: 4317
+    http:
+      # -- Disable OTLP http receiver
+      disable: false
+      # -- Port to bind OTLP http receiver on
+      port: 4318
+
+cluster:
+  # -- Number of pods in the cluster
+  podCount: 1
+  # -- (int) Replication factor for the ingested data.
+  # Default is size_of_cluster/2 + 1
+  replicationFactor: null
+  port:
+    # -- Port to use for internal exchange of data between nodes
+    # for serving read requests
+    read: 3127
+    # -- Port to use for internal exchange of data between nodes
+    # for serving write requests
+    write: 3128
+    # -- Port to use for internal exchange of data between nodes
+    # for maintaining cluster state
+    state: 3129
+
+# Default values for Alertmanager
+alertmanager:
+  # -- Alertmanager templates
+  templates: []
+
+  # -- Alertmanager templates
+  # Ref: https://prometheus.io/docs/alerting/0.25/configuration/
+  # See `values.yaml` for an example
+  config: {}
+  #   global:
+  #     smtp_from: "cubeapm@yourdomain.com"
+  #     smtp_smarthost: "localhost:25"
+  #     smtp_auth_username: ""
+  #     smtp_auth_password: ""
+  #     smtp_require_tls: true
+  #     # slack_api_url: ""
+  #     # pagerduty_url: ""
+  #   templates: []
+  #   receivers:
+  #     - name: "team-X-mails"
+  #       email_configs:
+  #         - to: "team-X+alerts@example.org"
+  #     - name: "team-X-pager"
+  #       email_configs:
+  #         - to: "team-X+alerts-critical@example.org"
+  #       pagerduty_configs:
+  #         - service_key: <team-X-key>
+  #     - name: "team-Y-mails"
+  #       email_configs:
+  #         - to: "team-Y+alerts@example.org"
+  #     - name: "team-Y-pager"
+  #       pagerduty_configs:
+  #         - service_key: <team-Y-key>
+  #     - name: "team-DB-pager"
+  #       pagerduty_configs:
+  #         - service_key: <team-DB-key>
+  #   # The root route on which each incoming alert enters.
+  #   route:
+  #     # The labels by which incoming alerts are grouped together. For example,
+  #     # multiple alerts coming in for cluster=A and alertname=LatencyHigh would
+  #     # be batched into a single group.
+  #     group_by: ["alertname", "cluster", "service"]
+
+  #     # When a new group of alerts is created by an incoming alert, wait at
+  #     # least 'group_wait' to send the initial notification.
+  #     # This way ensures that you get multiple alerts for the same group that start
+  #     # firing shortly after another are batched together on the first
+  #     # notification.
+  #     group_wait: 30s
+
+  #     # When the first notification was sent, wait 'group_interval' to send a batch
+  #     # of new alerts that started firing for that group.
+  #     group_interval: 5m
+
+  #     # If an alert has successfully been sent, wait 'repeat_interval' to
+  #     # resend them.
+  #     repeat_interval: 3h
+
+  #     # A default receiver
+  #     receiver: team-X-mails
+
+  #     # All the above attributes are inherited by all child routes and can
+  #     # be overwritten on each.
+
+  #     # The child route trees.
+  #     routes:
+  #       # This routes performs a regular expression match on alert labels to
+  #       # catch alerts that are related to a list of services.
+  #       - matchers:
+  #           - service=~"foo1|foo2|baz"
+  #         receiver: team-X-mails
+  #         # The service has a sub-route for critical alerts, any alerts
+  #         # that do not match, i.e. severity != critical, fall-back to the
+  #         # parent node and are sent to 'team-X-mails'
+  #         routes:
+  #           - matchers:
+  #               - severity="critical"
+  #             receiver: team-X-pager
+  #       # This route handles all alerts coming from a database service. If there's
+  #       # no team to handle it, it defaults to the DB team.
+  #       - matchers:
+  #           - service="database"
+  #         receiver: team-DB-pager
+  #         # Also group alerts by affected database.
+  #         group_by: [alertname, cluster, database]
+  #         routes:
+  #           - matchers:
+  #               - owner="team-X"
+  #             receiver: team-X-pager
+  #             continue: true
+  #           - matchers:
+  #               - owner="team-Y"
+  #             receiver: team-Y-pager

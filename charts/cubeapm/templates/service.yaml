@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "cubeapm.fullname" . }}
+  labels:
+    {{- include "cubeapm.labels" . | nindent 4 }}
+  {{- if .Values.service.annotations }}
+  annotations:
+    {{- toYaml .Values.service.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    {{- if not .Values.collector.otlp.grpc.disable }}
+    - port: {{ .Values.collector.otlp.grpc.port }}
+      targetPort: otlp-grpc
+      protocol: TCP
+      name: otlp-grpc
+    {{- end }}
+    {{- if not .Values.collector.otlp.http.disable }}
+    - port: {{ .Values.collector.otlp.http.port }}
+      targetPort: otlp-http
+      protocol: TCP
+      name: otlp-http
+    {{- end }}
+  selector:
+    {{- include "cubeapm.selectorLabels" . | nindent 4 }}

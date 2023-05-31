@@ -1,0 +1,10 @@
+# See https://github.com/helm/chart-testing#configuration
+remote: origin
+target-branch: main
+debug: true
+check-version-increment: false
+helm-extra-args: --timeout 600s
+charts:
+  - charts/cubeapm
+chart-repos:
+  - cubeapm=https://charts.cubeapm.com

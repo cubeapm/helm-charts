@@ -1,0 +1,198 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "cubeapm.fullname" . }}
+  labels:
+    {{- include "cubeapm.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "cubeapm.fullname" . }}
+  replicas: {{ .Values.cluster.podCount }}
+  selector:
+    matchLabels:
+      {{- include "cubeapm.selectorLabels" . | nindent 6 }}
+  # minReadySeconds: 10
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      labels:
+        {{- include "cubeapm.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- include "cubeapm.imagePullSecrets" . }}
+      serviceAccountName: {{ include "cubeapm.serviceAccountName" . }}
+      priorityClassName: {{ .Values.priorityClassName | quote }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ include "cubeapm.fullname" . }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: {{ template "cubeapm.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "--data-dir=/var/lib/cubeapm/data"
+            {{- if .Values.alertmanager.config }}
+            - "--alertmanager.config-file=/etc/cubeapm/alertmanager.yml"
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+            {{- if gt (int .Values.cluster.podCount) 1 }}
+            - name: cluster-read
+              containerPort: {{ .Values.cluster.port.read }}
+              protocol: TCP
+            - name: cluster-write
+              containerPort: {{ .Values.cluster.port.write }}
+              protocol: TCP
+            - name: cluster-state-t
+              containerPort: {{ .Values.cluster.port.state }}
+              protocol: TCP
+            - name: cluster-state-u
+              containerPort: {{ .Values.cluster.port.state }}
+              protocol: UDP
+            {{- end }}
+            {{- if not .Values.collector.otlp.grpc.disable }}
+            - name: otlp-grpc
+              containerPort: {{ .Values.collector.otlp.grpc.port }}
+              protocol: TCP
+            {{- end }}
+            {{- if not .Values.collector.otlp.http.disable }}
+            - name: otlp-http
+              containerPort: {{ .Values.collector.otlp.http.port }}
+              protocol: TCP
+            {{- end }}
+          env:
+            # {{- range $host := .Values.ingress.hosts }}
+            # {{- range .paths }}
+            # http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+            # {{- end }}
+            # {{- end }}
+            - name: CUBE_BASE_URL
+              value: {{ required "A valid configVars.baseUrl is required!" .Values.configVars.baseUrl }}
+            - name: CUBE_LOG_LEVEL
+              value: {{ .Values.configVars.logLevel }}
+            - name: CUBE_SHUTDOWN_DELAY
+              value: {{ .Values.configVars.shutdownDelay | quote }}
+            - name: CUBE_ALERTING_ALERTMANAGER_URLS
+              value: {{ .Values.configVars.alerting.alertmanager.urls }}
+            - name: CUBE_AUTH_DATABASE_URL
+              value: {{ required "A valid configVars.auth.database.url is required!" .Values.configVars.auth.database.url }}
+            - name: CUBE_AUTH_KEY_SESSION
+              value: {{ required "A valid configVars.auth.key.session is required!" .Values.configVars.auth.key.session }}
+            - name: CUBE_AUTH_KEY_TOKENS
+              value: {{ required "A valid configVars.auth.key.tokens is required!" .Values.configVars.auth.key.tokens }}
+            - name: CUBE_AUTH_SMTP_FROM
+              value: {{ .Values.configVars.auth.smtp.from }}
+            - name: CUBE_AUTH_SMTP_URL
+              value: {{ required "A valid configVars.auth.smtp.url is required!" .Values.configVars.auth.smtp.url }}
+            - name: CUBE_AUTH_SYS_ADMINS
+              value: {{ .Values.configVars.auth.sysAdmins }}
+            {{- if gt (int .Values.cluster.podCount) 1 }}
+            - name: CUBE_CLUSTER_REPLICATION_FACTOR
+              value: {{ .Values.cluster.replicationFactor }}
+            # - name: CUBE_CLUSTER_ADVERTISE_ADDRESS
+            #   value: $(POD_IP)
+            {{- $list := list }}
+            {{- $fullName := include "cubeapm.fullname" . }}
+            {{- range $i := until (int .Values.cluster.podCount) }}
+            {{- $list = append $list (printf "%s-%d.%s" ($fullName) ($i) ($fullName)) }}
+            {{- end }}
+            - name: CUBE_CLUSTER_PEERS
+              value: {{ join "," $list }}
+            {{- end }}
+            {{- if .Values.collector.otlp.grpc.disable }}
+            - name: CUBE_COLLECTOR_OTLP_GRPC_DISABLE
+              value: "true"
+            {{- else }}
+            - name: CUBE_COLLECTOR_OTLP_GRPC_PORT
+              value: {{ .Values.collector.otlp.grpc.port | quote }}
+            {{- end }}
+            {{- if .Values.collector.otlp.http.disable }}
+            - name: CUBE_COLLECTOR_OTLP_HTTP_DISABLE
+              value: "true"
+            {{- else }}
+            - name: CUBE_COLLECTOR_OTLP_HTTP_PORT
+              value: {{ .Values.collector.otlp.http.port | quote }}
+            {{- end }}
+            - name: CUBE_METRICS_RETENTION
+              value: {{ .Values.configVars.metrics.retention }}
+            - name: CUBE_METRICS_UPDATE_INTERVAL
+              value: {{ .Values.configVars.metrics.updateInterval }}
+            {{- if .Values.configVars.tracegen.disable }}
+            - name: CUBE_TRACEGEN_DISABLE
+              value: "true"
+            {{- end }}
+            - name: CUBE_TRACES_RETENTION
+              value: {{ .Values.configVars.traces.retention }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+          volumeMounts:
+            - name: config
+              mountPath: /etc/cubeapm
+          {{- if .Values.persistence.enabled }}
+          {{- if .Values.persistence.existingClaim }}
+            - name: cubeapm-data-existing-claim
+          {{- else }}
+            - name: cubeapm-data
+          {{- end }}
+          {{- else }}
+            - name: cubeapm-data-volume
+          {{- end }}
+              mountPath: /var/lib/cubeapm/data
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "cubeapm.fullname" . }}
+      {{- if (not .Values.persistence.enabled) }}
+        - name: cubeapm-data-volume
+          emptyDir: {}
+      {{- else if .Values.persistence.existingClaim }}
+        - name: cubeapm-data-existing-claim
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim }}
+      {{- end }}
+
+{{- if and (.Values.persistence.enabled) (not .Values.persistence.existingClaim) }}
+  volumeClaimTemplates:
+    - metadata:
+        name: cubeapm-data
+      spec:
+        accessModes:
+          {{- toYaml .Values.persistence.accessModes | nindent 10 }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}
+      {{- $storageClass := default .Values.persistence.storageClass .Values.global.storageClass -}}
+      {{- if $storageClass -}}
+      {{- if (eq "-" $storageClass) }}
+        storageClassName: ""
+      {{- else }}
+        storageClassName: {{ $storageClass }}
+      {{- end }}
+      {{- end }}
+{{- end }}
