@@ -2,6 +2,23 @@ apiVersion: v1
 entries:
   cubeapm:
   - apiVersion: v2
+    appVersion: v1.2.0
+    created: "2023-06-06T06:46:58.751193954Z"
+    description: CubeAPM - Application Performance Monitoring
+    digest: 4b2641d50767f98b069d52cdcae0049ea94f2ae996d548aa70568505c44d7ef8
+    home: https://cubeapm.com
+    icon: https://cubeapm.com/img/logo.svg
+    keywords:
+    - cubeapm
+    - opentelemetry
+    - otel
+    - apm
+    name: cubeapm
+    type: application
+    urls:
+    - https://github.com/cubeapm/helm-charts/releases/download/cubeapm-1.2.0/cubeapm-1.2.0.tgz
+    version: 1.2.0
+  - apiVersion: v2
     appVersion: v1.1.0
     created: "2023-05-31T19:02:07.812211077Z"
     description: CubeAPM - Application Performance Monitoring
@@ -18,4 +35,4 @@ entries:
     urls:
     - https://github.com/cubeapm/helm-charts/releases/download/cubeapm-1.1.2/cubeapm-1.1.2.tgz
     version: 1.1.2
-generated: "2023-05-31T19:02:07.812219577Z"
+generated: "2023-06-06T06:46:58.751214854Z"
