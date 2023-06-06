@@ -53,7 +53,7 @@ resources: {}
 image:
   registry: docker.io
   repository: cubeapm/cubeapm
-  tag: v1.1.0
+  tag: v1.2.0
   pullPolicy: IfNotPresent
 
 configVars:
@@ -87,6 +87,19 @@ configVars:
       # -- [Required] Encryption key for tokens. Must be 32 characters long.
       # Can use hex encoded UUID without dashes.
       tokens: ""
+    oidc:
+      github:
+        # -- Client ID for Sign in with GitHub.
+        # Refer https://cubeapm.com/install.html#github-app for guidance.
+        clientId: ""
+        # -- Client secret for Sign in with GitHub
+        clientSecret: ""
+      google:
+        # -- Client ID for Sign in with Google.
+        # Refer https://cubeapm.com/install.html#google-oauth for guidance.
+        clientId: ""
+        # -- Client secret for Sign in with Google
+        clientSecret: ""
     smtp:
       # -- Email address of sender. Your SMTP server must be
       # configured to allow sending emails from this address.
