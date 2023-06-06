@@ -98,6 +98,18 @@ spec:
               value: {{ required "A valid configVars.auth.key.session is required!" .Values.configVars.auth.key.session }}
             - name: CUBE_AUTH_KEY_TOKENS
               value: {{ required "A valid configVars.auth.key.tokens is required!" .Values.configVars.auth.key.tokens }}
+            {{- if or .Values.configVars.auth.oidc.github.clientId .Values.configVars.auth.oidc.github.clientSecret }}
+            - name: CUBE_AUTH_OIDC_GITHUB_CLIENT_ID
+              value: {{ required "A valid configVars.auth.oidc.github.clientId is also required if configVars.auth.oidc.github.clientSecret is set!" .Values.configVars.auth.oidc.github.clientId }}
+            - name: CUBE_AUTH_OIDC_GITHUB_CLIENT_SECRET
+              value: {{ required "A valid configVars.auth.oidc.github.clientSecret is also required if configVars.auth.oidc.github.clientId is set!" .Values.configVars.auth.oidc.github.clientSecret }}
+            {{- end }}
+            {{- if or .Values.configVars.auth.oidc.google.clientId .Values.configVars.auth.oidc.google.clientSecret }}
+            - name: CUBE_AUTH_OIDC_GOOGLE_CLIENT_ID
+              value: {{ required "A valid configVars.auth.oidc.google.clientId is also required if configVars.auth.oidc.google.clientSecret is set!" .Values.configVars.auth.oidc.google.clientId }}
+            - name: CUBE_AUTH_OIDC_GOOGLE_CLIENT_SECRET
+              value: {{ required "A valid configVars.auth.oidc.google.clientSecret is also required if configVars.auth.oidc.google.clientId is set!" .Values.configVars.auth.oidc.google.clientSecret }}
+            {{- end }}
             - name: CUBE_AUTH_SMTP_FROM
               value: {{ .Values.configVars.auth.smtp.from }}
             - name: CUBE_AUTH_SMTP_URL
