@@ -50,11 +50,17 @@ spec:
             {{- if .Values.alertmanager.config }}
             - "--alertmanager.config-file=/etc/cubeapm/alertmanager.yml"
             {{- end }}
+            {{- if .Values.configVars.metrics.customLabelsConfigFile }}
+            - "--metrics.custom-labels-config-file=/etc/cubeapm/metrics.yml"
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
             {{- if gt (int .Values.cluster.podCount) 1 }}
+            - name: cluster-dist
+              containerPort: {{ .Values.cluster.port.distributor }}
+              protocol: TCP
             - name: cluster-read
               containerPort: {{ .Values.cluster.port.read }}
               protocol: TCP
@@ -86,6 +92,8 @@ spec:
             # {{- end }}
             - name: CUBE_BASE_URL
               value: {{ required "A valid configVars.baseUrl is required!" .Values.configVars.baseUrl }}
+            - name: CUBE_DATABASE_URL
+              value: {{ required "A valid configVars.database.url is required!" .Values.configVars.database.url }}
             - name: CUBE_LOG_LEVEL
               value: {{ .Values.configVars.logLevel }}
             - name: CUBE_SHUTDOWN_DELAY
@@ -128,6 +136,18 @@ spec:
             {{- end }}
             - name: CUBE_CLUSTER_PEERS
               value: {{ join "," $list }}
+            {{- end }}
+            - name: CUBE_CLUSTER_PORT_DISTRIBUTOR
+              value: {{ .Values.cluster.port.distributor | quote }}
+            - name: CUBE_CLUSTER_PORT_READ
+              value: {{ .Values.cluster.port.read | quote }}
+            - name: CUBE_CLUSTER_PORT_WRITE
+              value: {{ .Values.cluster.port.write | quote }}
+            - name: CUBE_CLUSTER_PORT_STATE
+              value: {{ .Values.cluster.port.state | quote }}
+            {{- if .Values.collector.envTag }}
+            - name: CUBE_COLLECTOR_ENV_TAG
+              value: {{ .Values.collector.envTag }}
             {{- end }}
             {{- if .Values.collector.otlp.grpc.disable }}
             - name: CUBE_COLLECTOR_OTLP_GRPC_DISABLE

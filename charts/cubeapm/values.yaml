@@ -53,7 +53,7 @@ resources: {}
 image:
   registry: docker.io
   repository: cubeapm/cubeapm
-  tag: v1.2.0
+  tag: v1.3.0
   pullPolicy: IfNotPresent
 
 configVars:
@@ -61,6 +61,12 @@ configVars:
   # If you use reverse proxy and sub path specify full url (with sub path).
   # Examples: http://cube.yourdomain.com, https://yourdomain.com/cube, http://10.0.0.1:3125
   baseUrl: https://cubeapm.yourdomain.com
+  database:
+    # -- [Required] URL of database for storing config data (settings, dashboards, etc.)
+    # Example:
+    #  mysql://<username>:<password>@tcp(<host>:3306)/<db_name>
+    #  postgres://<username>:<password>@<host>:5432/<db_name>?sslmode=disable
+    url: ""
   # -- Minimal allowed log Level.
   # Supported values are debug, info, warn, and error.
   logLevel: "warn"
@@ -116,12 +122,24 @@ configVars:
     retention: 720h
     # -- Metrics update interval. Must be between 500ms and 1m0s.
     updateInterval: 15s
+    # -- Config for extending CubeAPM metrics with custom labels
+    # See `values.yaml` for an example
+    customLabelsConfigFile: {}
+    # custom_labels:
+    #   http_response_code:
+    #     filters:
+    #       - label: span_kind
+    #         match: server
+    #     value:
+    #       tag: http.status_code
+    #       match: '(\d)\d{2}'
+    #       replace: '${1}xx'
   tracegen:
     # -- Disable the built-in demo trace generator
     disable: false
   traces:
     # -- Traces retention period. Must be between 1h0m0s and 720h0m0s.
-    retention: 168h
+    retention: 72h
 
 service:
   # -- Annotations to CubeAPM service
@@ -165,6 +183,10 @@ persistence:
   size: 1Gi
 
 collector:
+  # -- Tag name for environment.
+  # If set, the value of this tag in traces will be used as the
+  # value of env label in metrics.
+  envTag: ""
   otlp:
     grpc:
       # -- Disable OTLP grpc receiver
@@ -184,6 +206,8 @@ cluster:
   # Default is size_of_cluster/2 + 1
   replicationFactor: null
   port:
+    # -- Port to use for internal distribution of incoming traces data
+    distributor: 3126
     # -- Port to use for internal exchange of data between nodes
     # for serving read requests
     read: 3127

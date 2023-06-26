@@ -11,3 +11,7 @@ data:
     {{- $value | nindent 4 }}
   {{- end }}
   {{- end }}
+  {{- if .Values.configVars.metrics.customLabelsConfigFile }}
+  metrics.yml: |
+    {{- toYaml .Values.configVars.metrics.customLabelsConfigFile | nindent 4 }}
+  {{- end }}
