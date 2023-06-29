@@ -165,6 +165,36 @@ ingress:
   # -- CubeAPM Ingress TLS
   tls: []
 
+ingressTraces:
+  grpc:
+    # -- Enable ingress for ingesting traces into CubeAPM.
+    # Services that need to send traces data to CubeAPM can either use
+    # <cubeapm_service_name>.<namespace>.svc.cluster.local:4317 as the endpoint
+    # (in which case this ingress is not needed) or they can use the host:port
+    # configured in this ingress. If TLS support is required, then this ingress
+    # will have to be used as CubeAPM does not handle TLS by itself.
+    #
+    # Note that this ingress must be configured to use GRPC protocol for
+    # forwarding traffic to the service. For kubernetes nginx ingress
+    # controller, this can be achieved by setting the annotation
+    # nginx.ingress.kubernetes.io/backend-protocol: GRPC
+    #
+    # Note also that this ingress may not work properly without TLS, depending
+    # on the ingress controller being used (e.g. nginx).
+    enabled: false
+    # -- Ingress Class Name to be used to identify ingress controllers
+    className: ""
+    # -- Annotations to the ingress
+    annotations: {}
+    # -- Ingress Host names with their path details
+    hosts:
+      - host: cubeapm-traces.yourdomain.com
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    # -- Ingress TLS
+    tls: []
+
 persistence:
   # -- Enable data persistence using PVC. If not enabled, data is stored in an emptyDir.
   enabled: true
