@@ -94,6 +94,8 @@ spec:
               value: {{ required "A valid configVars.baseUrl is required!" .Values.configVars.baseUrl }}
             - name: CUBE_DATABASE_URL
               value: {{ required "A valid configVars.database.url is required!" .Values.configVars.database.url }}
+            - name: CUBE_HTTP_PORT
+              value: {{ .Values.service.port | quote }}
             - name: CUBE_LOG_LEVEL
               value: {{ .Values.configVars.logLevel }}
             - name: CUBE_SHUTDOWN_DELAY

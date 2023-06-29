@@ -1,9 +1,12 @@
-{{- if .Values.ingress.enabled -}}
+{{- if .Values.ingressTraces.grpc.enabled -}}
+{{- if .Values.collector.otlp.grpc.disable -}}
+{{- fail "collector.otlp.grpc.disable must also be set to false if ingressTraces.grpc.enabled is set to true" }}
+{{- end }}
 {{- $fullName := include "cubeapm.fullname" . -}}
-{{- $svcPort := .Values.service.port -}}
-{{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
-  {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className }}
+{{- $svcPort := .Values.collector.otlp.grpc.port -}}
+{{- if and .Values.ingressTraces.grpc.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.ingressTraces.grpc.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.ingressTraces.grpc.annotations "kubernetes.io/ingress.class" .Values.ingressTraces.grpc.className }}
   {{- end }}
 {{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -15,20 +18,20 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $fullName }}
+  name: {{ $fullName | trunc 51 | trimSuffix "-" }}-traces-grpc
   labels:
     {{- include "cubeapm.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
+  {{- with .Values.ingressTraces.grpc.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
-  ingressClassName: {{ .Values.ingress.className }}
+  {{- if and .Values.ingressTraces.grpc.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.ingressTraces.grpc.className }}
   {{- end }}
-  {{- if .Values.ingress.tls }}
+  {{- if .Values.ingressTraces.grpc.tls }}
   tls:
-    {{- range .Values.ingress.tls }}
+    {{- range .Values.ingressTraces.grpc.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -37,7 +40,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.ingress.hosts }}
+    {{- range .Values.ingressTraces.grpc.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
