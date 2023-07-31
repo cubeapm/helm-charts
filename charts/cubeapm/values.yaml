@@ -53,7 +53,7 @@ resources: {}
 image:
   registry: docker.io
   repository: cubeapm/cubeapm
-  tag: v1.3.0
+  tag: v1.4.0
   pullPolicy: IfNotPresent
 
 configVars:
@@ -73,12 +73,35 @@ configVars:
   # -- (string) Delay before shutdown. During this delay, health check returns
   # non-OK responses so load balancers can route new requests to other servers.
   shutdownDelay: 0
+  smtp:
+    # -- Email address of sender. Your SMTP server must be
+    # configured to allow sending emails from this address.
+    from: ""
+    # -- [Required] URL of SMTP server for sending emails, e.g., reset password email, alert notifications.
+    # Example:
+    #  smtp://<username>:<password>@<mailserver>:25/?disable_starttls=false
+    url: ""
+  # -- [Required] Account token obtained from CubeAPM. This token is used for authentication with CubeAPM.
+  token: ""
 
   alerting:
     alertmanager:
       # -- Prometheus Alertmanager URL to override in-built alertmanager, e.g. http://127.0.0.1:9093.
       # List all Alertmanager URLs separated by comma if it is running in cluster mode.
       urls: ""
+
+  alertmanager:
+    oauth:
+      pagerduty:
+        # -- App ID for sending alert notifications on PagerDuty.
+        # Refer https://cubeapm.com/install.html#pagerduty-app for guidance.
+        appId: ""
+      slack:
+        # -- Bot user OAuth token for sending alert notifications on Slack.
+        # Slack bot tokens start with 'xoxb'.
+        # Refer https://cubeapm.com/install.html#slack-app for guidance.
+        token: ""
+
   auth:
     database:
       # -- [Required] URL of database for storing user accounts data
@@ -107,15 +130,16 @@ configVars:
         # -- Client secret for Sign in with Google
         clientSecret: ""
     smtp:
-      # -- Email address of sender. Your SMTP server must be
-      # configured to allow sending emails from this address.
+      # -- [Deprecated] Please use configVars.smtp.from instead. This flag will be removed in next release.
       from: cubeapm@yourdomain.com
-      # -- [Required] URL of SMTP server for sending emails
-      # Example:
-      #  smtp://<username>:<password>@<mailserver>:25/?skip_ssl_verify=false
+      # -- [Deprecated] Please use configVars.smtp.url instead. This flag will be removed in next release.
       url: ""
     # -- Comma separated list of email ids of users to be given sysadmin privilege.
     sysAdmins: ""
+
+  files:
+    # -- Static files (e.g. graph images for alerts) retention period
+    retention: 720h
 
   metrics:
     # -- Metrics retention period. Must be between 24h0m0s and 1440h0m0s.
@@ -134,9 +158,11 @@ configVars:
     #       tag: http.status_code
     #       match: '(\d)\d{2}'
     #       replace: '${1}xx'
+
   tracegen:
     # -- Disable the built-in demo trace generator
     disable: false
+
   traces:
     # -- Traces retention period. Must be between 1h0m0s and 720h0m0s.
     retention: 72h
@@ -247,97 +273,3 @@ cluster:
     # -- Port to use for internal exchange of data between nodes
     # for maintaining cluster state
     state: 3129
-
-# Default values for Alertmanager
-alertmanager:
-  # -- Alertmanager templates
-  templates: []
-
-  # -- Alertmanager templates
-  # Ref: https://prometheus.io/docs/alerting/0.25/configuration/
-  # See `values.yaml` for an example
-  config: {}
-  #   global:
-  #     smtp_from: "cubeapm@yourdomain.com"
-  #     smtp_smarthost: "localhost:25"
-  #     smtp_auth_username: ""
-  #     smtp_auth_password: ""
-  #     smtp_require_tls: true
-  #     # slack_api_url: ""
-  #     # pagerduty_url: ""
-  #   templates: []
-  #   receivers:
-  #     - name: "team-X-mails"
-  #       email_configs:
-  #         - to: "team-X+alerts@example.org"
-  #     - name: "team-X-pager"
-  #       email_configs:
-  #         - to: "team-X+alerts-critical@example.org"
-  #       pagerduty_configs:
-  #         - service_key: <team-X-key>
-  #     - name: "team-Y-mails"
-  #       email_configs:
-  #         - to: "team-Y+alerts@example.org"
-  #     - name: "team-Y-pager"
-  #       pagerduty_configs:
-  #         - service_key: <team-Y-key>
-  #     - name: "team-DB-pager"
-  #       pagerduty_configs:
-  #         - service_key: <team-DB-key>
-  #   # The root route on which each incoming alert enters.
-  #   route:
-  #     # The labels by which incoming alerts are grouped together. For example,
-  #     # multiple alerts coming in for cluster=A and alertname=LatencyHigh would
-  #     # be batched into a single group.
-  #     group_by: ["alertname", "cluster", "service"]
-
-  #     # When a new group of alerts is created by an incoming alert, wait at
-  #     # least 'group_wait' to send the initial notification.
-  #     # This way ensures that you get multiple alerts for the same group that start
-  #     # firing shortly after another are batched together on the first
-  #     # notification.
-  #     group_wait: 30s
-
-  #     # When the first notification was sent, wait 'group_interval' to send a batch
-  #     # of new alerts that started firing for that group.
-  #     group_interval: 5m
-
-  #     # If an alert has successfully been sent, wait 'repeat_interval' to
-  #     # resend them.
-  #     repeat_interval: 3h
-
-  #     # A default receiver
-  #     receiver: team-X-mails
-
-  #     # All the above attributes are inherited by all child routes and can
-  #     # be overwritten on each.
-
-  #     # The child route trees.
-  #     routes:
-  #       # This routes performs a regular expression match on alert labels to
-  #       # catch alerts that are related to a list of services.
-  #       - matchers:
-  #           - service=~"foo1|foo2|baz"
-  #         receiver: team-X-mails
-  #         # The service has a sub-route for critical alerts, any alerts
-  #         # that do not match, i.e. severity != critical, fall-back to the
-  #         # parent node and are sent to 'team-X-mails'
-  #         routes:
-  #           - matchers:
-  #               - severity="critical"
-  #             receiver: team-X-pager
-  #       # This route handles all alerts coming from a database service. If there's
-  #       # no team to handle it, it defaults to the DB team.
-  #       - matchers:
-  #           - service="database"
-  #         receiver: team-DB-pager
-  #         # Also group alerts by affected database.
-  #         group_by: [alertname, cluster, database]
-  #         routes:
-  #           - matchers:
-  #               - owner="team-X"
-  #             receiver: team-X-pager
-  #             continue: true
-  #           - matchers:
-  #               - owner="team-Y"
-  #             receiver: team-Y-pager
