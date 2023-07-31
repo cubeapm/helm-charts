@@ -47,9 +47,6 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - "--data-dir=/var/lib/cubeapm/data"
-            {{- if .Values.alertmanager.config }}
-            - "--alertmanager.config-file=/etc/cubeapm/alertmanager.yml"
-            {{- end }}
             {{- if .Values.configVars.metrics.customLabelsConfigFile }}
             - "--metrics.custom-labels-config-file=/etc/cubeapm/metrics.yml"
             {{- end }}
@@ -90,6 +87,8 @@ spec:
             # http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
             # {{- end }}
             # {{- end }}
+            - name: CUBE_TOKEN
+              value: {{ required "A valid configVars.token is required!" .Values.configVars.token }}
             - name: CUBE_BASE_URL
               value: {{ required "A valid configVars.baseUrl is required!" .Values.configVars.baseUrl }}
             - name: CUBE_DATABASE_URL
@@ -100,8 +99,22 @@ spec:
               value: {{ .Values.configVars.logLevel }}
             - name: CUBE_SHUTDOWN_DELAY
               value: {{ .Values.configVars.shutdownDelay | quote }}
+            {{- if or .Values.configVars.smtp.from .Values.configVars.auth.smtp.from }}
+            - name: CUBE_SMTP_FROM
+              value: {{ default .Values.configVars.auth.smtp.from .Values.configVars.smtp.from }}
+            {{- end }}
+            {{- if or .Values.configVars.smtp.url .Values.configVars.auth.smtp.url }}
+            - name: CUBE_SMTP_URL
+              value: {{ default .Values.configVars.auth.smtp.url .Values.configVars.smtp.url }}
+            {{- else }}
+            {{- fail "A valid configVars.auth.smtp.url is required!" }}
+            {{- end }}
             - name: CUBE_ALERTING_ALERTMANAGER_URLS
               value: {{ .Values.configVars.alerting.alertmanager.urls }}
+            - name: CUBE_ALERTMANAGER_OAUTH_PAGERDUTY_APP_ID
+              value: {{ .Values.configVars.alertmanager.oauth.pagerduty.appId }}
+            - name: CUBE_ALERTMANAGER_OAUTH_SLACK_TOKEN
+              value: {{ .Values.configVars.alertmanager.oauth.slack.token }}
             - name: CUBE_AUTH_DATABASE_URL
               value: {{ required "A valid configVars.auth.database.url is required!" .Values.configVars.auth.database.url }}
             - name: CUBE_AUTH_KEY_SESSION
@@ -120,10 +133,6 @@ spec:
             - name: CUBE_AUTH_OIDC_GOOGLE_CLIENT_SECRET
               value: {{ required "A valid configVars.auth.oidc.google.clientSecret is also required if configVars.auth.oidc.google.clientId is set!" .Values.configVars.auth.oidc.google.clientSecret }}
             {{- end }}
-            - name: CUBE_AUTH_SMTP_FROM
-              value: {{ .Values.configVars.auth.smtp.from }}
-            - name: CUBE_AUTH_SMTP_URL
-              value: {{ required "A valid configVars.auth.smtp.url is required!" .Values.configVars.auth.smtp.url }}
             - name: CUBE_AUTH_SYS_ADMINS
               value: {{ .Values.configVars.auth.sysAdmins }}
             {{- if gt (int .Values.cluster.podCount) 1 }}
@@ -165,6 +174,8 @@ spec:
             - name: CUBE_COLLECTOR_OTLP_HTTP_PORT
               value: {{ .Values.collector.otlp.http.port | quote }}
             {{- end }}
+            - name: CUBE_FILES_RETENTION
+              value: {{ .Values.configVars.files.retention }}
             - name: CUBE_METRICS_RETENTION
               value: {{ .Values.configVars.metrics.retention }}
             - name: CUBE_METRICS_UPDATE_INTERVAL
