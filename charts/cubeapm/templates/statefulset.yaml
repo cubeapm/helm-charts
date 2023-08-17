@@ -99,18 +99,20 @@ spec:
               value: {{ .Values.configVars.logLevel }}
             - name: CUBE_SHUTDOWN_DELAY
               value: {{ .Values.configVars.shutdownDelay | quote }}
-            {{- if or .Values.configVars.smtp.from .Values.configVars.auth.smtp.from }}
+            {{- if .Values.configVars.smtp.from }}
             - name: CUBE_SMTP_FROM
-              value: {{ default .Values.configVars.auth.smtp.from .Values.configVars.smtp.from }}
+              value: {{ .Values.configVars.smtp.from }}
             {{- end }}
-            {{- if or .Values.configVars.smtp.url .Values.configVars.auth.smtp.url }}
             - name: CUBE_SMTP_URL
-              value: {{ default .Values.configVars.auth.smtp.url .Values.configVars.smtp.url }}
-            {{- else }}
-            {{- fail "A valid configVars.auth.smtp.url is required!" }}
-            {{- end }}
+              value: {{ required "A valid configVars.smtp.url is required!" .Values.configVars.smtp.url }}
+            - name: CUBE_TIME_ZONE
+              value: {{ .Values.configVars.timeZone }}
             - name: CUBE_ALERTING_ALERTMANAGER_URLS
               value: {{ .Values.configVars.alerting.alertmanager.urls }}
+            {{- if .Values.configVars.alertmanager.charts.disable }}
+            - name: CUBE_ALERTMANAGER_CHARTS_DISABLE
+              value: "true"
+            {{- end }}
             - name: CUBE_ALERTMANAGER_OAUTH_PAGERDUTY_APP_ID
               value: {{ .Values.configVars.alertmanager.oauth.pagerduty.appId }}
             - name: CUBE_ALERTMANAGER_OAUTH_SLACK_TOKEN
