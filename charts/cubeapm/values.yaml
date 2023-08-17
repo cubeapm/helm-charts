@@ -53,7 +53,7 @@ resources: {}
 image:
   registry: docker.io
   repository: cubeapm/cubeapm
-  tag: v1.4.0
+  tag: v1.5.0
   pullPolicy: IfNotPresent
 
 configVars:
@@ -81,6 +81,11 @@ configVars:
     # Example:
     #  smtp://<username>:<password>@<mailserver>:25/?disable_starttls=false
     url: ""
+  # -- Timezone of CubeAPM users. While most of the timezone related operations are done on the browser
+  # using browser's time zone setting, a few operations need to be performed on the server and they use
+  # this setting.
+  # Examples: "America/Los_Angeles", "Asia/Kolkata", "UTC"
+  timeZone: "UTC"
   # -- [Required] Account token obtained from CubeAPM. This token is used for authentication with CubeAPM.
   token: ""
 
@@ -91,15 +96,18 @@ configVars:
       urls: ""
 
   alertmanager:
+    charts:
+      # -- Disable charts in alert notifications
+      disable: false
     oauth:
       pagerduty:
         # -- App ID for sending alert notifications on PagerDuty.
-        # Refer https://cubeapm.com/install.html#pagerduty-app for guidance.
+        # Refer https://docs.cubeapm.com/install/configure-cubeapm/connect-with-pagerduty-for-alerting for guidance.
         appId: ""
       slack:
         # -- Bot user OAuth token for sending alert notifications on Slack.
         # Slack bot tokens start with 'xoxb'.
-        # Refer https://cubeapm.com/install.html#slack-app for guidance.
+        # Refer https://docs.cubeapm.com/install/configure-cubeapm/connect-with-slack-for-alerting for guidance.
         token: ""
 
   auth:
@@ -119,21 +127,16 @@ configVars:
     oidc:
       github:
         # -- Client ID for Sign in with GitHub.
-        # Refer https://cubeapm.com/install.html#github-app for guidance.
+        # Refer https://docs.cubeapm.com/install/configure-cubeapm/sign-in-with-github for guidance.
         clientId: ""
         # -- Client secret for Sign in with GitHub
         clientSecret: ""
       google:
         # -- Client ID for Sign in with Google.
-        # Refer https://cubeapm.com/install.html#google-oauth for guidance.
+        # Refer https://docs.cubeapm.com/install/configure-cubeapm/sign-in-with-google for guidance.
         clientId: ""
         # -- Client secret for Sign in with Google
         clientSecret: ""
-    smtp:
-      # -- [Deprecated] Please use configVars.smtp.from instead. This flag will be removed in next release.
-      from: cubeapm@yourdomain.com
-      # -- [Deprecated] Please use configVars.smtp.url instead. This flag will be removed in next release.
-      url: ""
     # -- Comma separated list of email ids of users to be given sysadmin privilege.
     sysAdmins: ""
 
