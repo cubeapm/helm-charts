@@ -53,7 +53,7 @@ resources: {}
 image:
   registry: docker.io
   repository: cubeapm/cubeapm
-  tag: v1.5.0
+  tag: v1.6.0
   pullPolicy: IfNotPresent
 
 configVars:
@@ -84,8 +84,8 @@ configVars:
   # -- Timezone of CubeAPM users. While most of the timezone related operations are done on the browser
   # using browser's time zone setting, a few operations need to be performed on the server and they use
   # this setting.
-  # Examples: "America/Los_Angeles", "Asia/Kolkata", "UTC"
-  timeZone: "UTC"
+  # Examples: America/Los_Angeles, Asia/Kolkata, UTC
+  timeZone: UTC
   # -- [Required] Account token obtained from CubeAPM. This token is used for authentication with CubeAPM.
   token: ""
 
@@ -194,9 +194,21 @@ ingress:
   # -- CubeAPM Ingress TLS
   tls: []
 
+# https://github.com/kubernetes-sigs/aws-load-balancer-controller
+# It satisfies Kubernetes Ingress resources by provisioning Application Load Balancers.
+# It satisfies Kubernetes Service resources by provisioning Network Load Balancers.
+serviceTraces:
+  # -- Set up a Network Load Balancer for ingesting traces into CubeAPM from
+  # outside of k8s over TCP.
+  enabled: false
+  # -- Annotations to CubeAPM service
+  annotations: {}
+  # -- Service type
+  type: LoadBalancer
+
 ingressTraces:
   grpc:
-    # -- Enable ingress for ingesting traces into CubeAPM.
+    # -- Enable ingress for ingesting traces into CubeAPM from outside of k8s over gRPC.
     # Services that need to send traces data to CubeAPM can either use
     # <cubeapm_service_name>.<namespace>.svc.cluster.local:4317 as the endpoint
     # (in which case this ingress is not needed) or they can use the host:port
@@ -217,7 +229,27 @@ ingressTraces:
     annotations: {}
     # -- Ingress Host names with their path details
     hosts:
-      - host: cubeapm-traces.yourdomain.com
+      - host: cubeapm-traces-grpc.yourdomain.com
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    # -- Ingress TLS
+    tls: []
+  http:
+    # -- Enable ingress for ingesting traces into CubeAPM from outside of k8s over HTTP.
+    # Services that need to send traces data to CubeAPM can either use
+    # <cubeapm_service_name>.<namespace>.svc.cluster.local:4318 as the endpoint
+    # (in which case this ingress is not needed) or they can use the host:port
+    # configured in this ingress. If TLS support is required, then this ingress
+    # will have to be used as CubeAPM does not handle TLS by itself.
+    enabled: false
+    # -- Ingress Class Name to be used to identify ingress controllers
+    className: ""
+    # -- Annotations to the ingress
+    annotations: {}
+    # -- Ingress Host names with their path details
+    hosts:
+      - host: cubeapm-traces-http.yourdomain.com
         paths:
           - path: /
             pathType: ImplementationSpecific
@@ -239,7 +271,7 @@ persistence:
   accessModes:
     - ReadWriteOnce
   # -- Persistent Volume size
-  size: 1Gi
+  size: 50Gi
 
 collector:
   # -- Tag name for environment.
@@ -257,13 +289,24 @@ collector:
       disable: false
       # -- Port to bind OTLP http receiver on
       port: 4318
+      cors:
+        # -- Comma separated list of allowed origins for CORS requests.
+        # Examples: "http://*.domain.com", "*"
+        origins: ""
 
 cluster:
   # -- Number of pods in the cluster
-  podCount: 1
+  podCount: 3
   # -- (int) Replication factor for the ingested data.
   # Default is size_of_cluster/2 + 1
   replicationFactor: null
+  advertise:
+    # -- Explicit address to advertise in cluster, e.g. 10.0.0.1.
+    # If not specified, CubeAPM will try to detect the address automatically.
+    address: ""
+    # -- By default, CubeAPM only uses private IP address as the advertise
+    # address. Set this flag to true to allow public IP addresses to be used.
+    allowInsecure: false
   port:
     # -- Port to use for internal distribution of incoming traces data
     distributor: 3126

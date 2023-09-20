@@ -1,0 +1,32 @@
+{{- if .Values.serviceTraces.enabled -}}
+{{- $fullName := include "cubeapm.fullname" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName | trunc 56 | trimSuffix "-" }}-traces
+  labels:
+    {{- include "cubeapm.labels" . | nindent 4 }}
+  {{- if .Values.serviceTraces.annotations }}
+  annotations:
+    {{- toYaml .Values.serviceTraces.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.serviceTraces.type }}
+  ports:
+    {{- if not .Values.collector.otlp.grpc.disable }}
+    - port: {{ .Values.collector.otlp.grpc.port }}
+      targetPort: otlp-grpc
+      protocol: TCP
+      # appProtocol:
+      name: otlp-grpc
+    {{- end }}
+    {{- if not .Values.collector.otlp.http.disable }}
+    - port: {{ .Values.collector.otlp.http.port }}
+      targetPort: otlp-http
+      protocol: TCP
+      # appProtocol:
+      name: otlp-http
+    {{- end }}
+  selector:
+    {{- include "cubeapm.selectorLabels" . | nindent 4 }}
+{{- end }}

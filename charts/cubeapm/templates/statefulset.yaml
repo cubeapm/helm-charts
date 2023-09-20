@@ -140,8 +140,13 @@ spec:
             {{- if gt (int .Values.cluster.podCount) 1 }}
             - name: CUBE_CLUSTER_REPLICATION_FACTOR
               value: {{ .Values.cluster.replicationFactor }}
-            # - name: CUBE_CLUSTER_ADVERTISE_ADDRESS
-            #   value: $(POD_IP)
+            - name: CUBE_CLUSTER_ADVERTISE_ADDRESS
+              # value: $(POD_IP)
+              value: {{ .Values.cluster.advertise.address }}
+            {{- if .Values.cluster.advertise.allowInsecure }}
+            - name: CUBE_CLUSTER_ALLOW_INSECURE_ADVERTISE
+              value: "true"
+            {{- end }}
             {{- $list := list }}
             {{- $fullName := include "cubeapm.fullname" . }}
             {{- range $i := until (int .Values.cluster.podCount) }}
@@ -175,6 +180,8 @@ spec:
             {{- else }}
             - name: CUBE_COLLECTOR_OTLP_HTTP_PORT
               value: {{ .Values.collector.otlp.http.port | quote }}
+            - name: CUBE_COLLECTOR_OTLP_HTTP_CORS_ORIGINS
+              value: {{ .Values.collector.otlp.http.cors.origins }}
             {{- end }}
             - name: CUBE_FILES_RETENTION
               value: {{ .Values.configVars.files.retention }}
