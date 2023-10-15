@@ -53,7 +53,7 @@ resources: {}
 image:
   registry: docker.io
   repository: cubeapm/cubeapm
-  tag: v1.6.0
+  tag: v1.7.0
   pullPolicy: IfNotPresent
 
 configVars:
@@ -149,8 +149,8 @@ configVars:
     retention: 720h
     # -- Metrics update interval. Must be between 500ms and 1m0s.
     updateInterval: 15s
-    # -- Config for extending CubeAPM metrics with custom labels
-    # See `values.yaml` for an example
+    # -- Config for extending CubeAPM metrics with custom labels.
+    # See `values.yaml` for an example.
     customLabelsConfigFile: {}
     # custom_labels:
     #   http_response_code:
@@ -169,6 +169,16 @@ configVars:
   traces:
     # -- Traces retention period. Must be between 1h0m0s and 720h0m0s.
     retention: 72h
+    # -- Config for creating custom indexes on traces.
+    # See `values.yaml` for an example.
+    customIndexesConfigFile: {}
+    # custom_indexes:
+    #   http_response_code_4xx:
+    #     filters:
+    #       - label: span_kind
+    #         match: server
+    #       - label: http.status_code
+    #         match: '4\d{2}'
 
 service:
   # -- Annotations to CubeAPM service

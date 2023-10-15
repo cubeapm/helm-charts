@@ -7,3 +7,7 @@ data:
   metrics.yml: |
     {{- toYaml .Values.configVars.metrics.customLabelsConfigFile | nindent 4 }}
   {{- end }}
+  {{- if .Values.configVars.traces.customIndexesConfigFile }}
+  traces.yml: |
+    {{- toYaml .Values.configVars.traces.customIndexesConfigFile | nindent 4 }}
+  {{- end }}

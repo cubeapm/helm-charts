@@ -50,6 +50,9 @@ spec:
             {{- if .Values.configVars.metrics.customLabelsConfigFile }}
             - "--metrics.custom-labels-config-file=/etc/cubeapm/metrics.yml"
             {{- end }}
+            {{- if .Values.configVars.traces.customIndexesConfigFile }}
+            - "--traces.custom-indexes-config-file=/etc/cubeapm/traces.yml"
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
