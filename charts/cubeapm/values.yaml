@@ -53,7 +53,7 @@ resources: {}
 image:
   registry: docker.io
   repository: cubeapm/cubeapm
-  tag: v1.7.0
+  tag: v1.8.0
   pullPolicy: IfNotPresent
 
 configVars:
@@ -141,7 +141,7 @@ configVars:
     sysAdmins: ""
 
   files:
-    # -- Static files (e.g. graph images for alerts) retention period
+    # -- [Deprecated] Static files (e.g. graph images for alerts) retention period
     retention: 720h
 
   metrics:
