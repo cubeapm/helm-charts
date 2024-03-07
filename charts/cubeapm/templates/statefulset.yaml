@@ -202,6 +202,10 @@ spec:
             {{- end }}
             - name: CUBE_TRACES_RETENTION
               value: {{ .Values.configVars.traces.retention }}
+            # add extraEnvs
+            {{- with .Values.extraEnvs }}
+            {{- . | toYaml | nindent 12 }}
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /health
