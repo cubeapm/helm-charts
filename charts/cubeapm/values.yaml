@@ -134,6 +134,10 @@ configVars:
     # -- Comma separated list of email ids of users to be given sysadmin privilege.
     sysAdmins: ""
 
+    # -- Default role to be assigned to a new user on signup.
+    # Possible values are none, viewer, editor, admin.
+    defaultRole: viewer
+
   metrics:
     # -- Metrics retention period. Must be between 24h0m0s and 1440h0m0s.
     retention: 720h
