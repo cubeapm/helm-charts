@@ -200,6 +200,8 @@ service:
   type: ClusterIP
   # -- HTTP port
   port: 3125
+  # -- Port to use for internal http communication between CubeAPM nodes
+  internalPort: 3130
 
 ingress:
   # -- Enable ingress for CubeAPM
@@ -221,8 +223,8 @@ ingress:
 # It satisfies Kubernetes Ingress resources by provisioning Application Load Balancers.
 # It satisfies Kubernetes Service resources by provisioning Network Load Balancers.
 serviceTraces:
-  # -- Set up a Network Load Balancer for ingesting traces into CubeAPM from
-  # outside of k8s over TCP.
+  # -- Set up a Network Load Balancer for ingesting metrics and traces into
+  # CubeAPM from outside of k8s over TCP.
   enabled: false
   # -- Annotations to CubeAPM service
   annotations: {}
@@ -273,6 +275,26 @@ ingressTraces:
     # -- Ingress Host names with their path details
     hosts:
       - host: cubeapm-traces-http.yourdomain.com
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    # -- Ingress TLS
+    tls: []
+  metrics:
+    # -- Enable ingress for ingesting metrics into CubeAPM from outside of k8s over HTTP.
+    # Services that need to send metrics data to CubeAPM can either use
+    # <cubeapm_service_name>.<namespace>.svc.cluster.local:3030 as the endpoint
+    # (in which case this ingress is not needed) or they can use the host:port
+    # configured in this ingress. If TLS support is required, then this ingress
+    # will have to be used as CubeAPM does not handle TLS by itself.
+    enabled: false
+    # -- Ingress Class Name to be used to identify ingress controllers
+    className: ""
+    # -- Annotations to the ingress
+    annotations: {}
+    # -- Ingress Host names with their path details
+    hosts:
+      - host: cubeapm-metrics.yourdomain.com
         paths:
           - path: /
             pathType: ImplementationSpecific

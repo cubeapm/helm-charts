@@ -60,6 +60,9 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+            - name: http-internal
+              containerPort: {{ .Values.service.internalPort }}
+              protocol: TCP
             {{- if gt (int .Values.cluster.podCount) 1 }}
             - name: cluster-dist
               containerPort: {{ .Values.cluster.port.distributor }}
@@ -105,6 +108,8 @@ spec:
             {{- end }}
             - name: CUBE_HTTP_PORT
               value: {{ .Values.service.port | quote }}
+            - name: CUBE_HTTP_PORT_INTERNAL
+              value: {{ .Values.service.internalPort | quote }}
             - name: CUBE_LOG_LEVEL
               value: {{ .Values.configVars.logLevel }}
             - name: CUBE_SHUTDOWN_DELAY
