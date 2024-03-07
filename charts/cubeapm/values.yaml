@@ -53,7 +53,7 @@ resources: {}
 image:
   registry: docker.io
   repository: cubeapm/cubeapm
-  tag: v1.8.0
+  tag: v1.9.0
   pullPolicy: IfNotPresent
 
 configVars:
