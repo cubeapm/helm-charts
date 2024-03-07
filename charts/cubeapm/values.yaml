@@ -89,12 +89,6 @@ configVars:
   # -- [Required] Account token obtained from CubeAPM. This token is used for authentication with CubeAPM.
   token: ""
 
-  alerting:
-    alertmanager:
-      # -- Prometheus Alertmanager URL to override in-built alertmanager, e.g. http://127.0.0.1:9093.
-      # List all Alertmanager URLs separated by comma if it is running in cluster mode.
-      urls: ""
-
   alertmanager:
     charts:
       # -- Disable charts in alert notifications
@@ -140,10 +134,6 @@ configVars:
     # -- Comma separated list of email ids of users to be given sysadmin privilege.
     sysAdmins: ""
 
-  files:
-    # -- [Deprecated] Static files (e.g. graph images for alerts) retention period
-    retention: 720h
-
   metrics:
     # -- Metrics retention period. Must be between 24h0m0s and 1440h0m0s.
     retention: 720h
@@ -152,15 +142,15 @@ configVars:
     # -- Config for extending CubeAPM metrics with custom labels.
     # See `values.yaml` for an example.
     customLabelsConfigFile: {}
-    # custom_labels:
-    #   http_response_code:
-    #     filters:
-    #       - label: span_kind
-    #         match: server
-    #     value:
-    #       tag: http.status_code
-    #       match: '(\d)\d{2}'
-    #       replace: '${1}xx'
+      # custom_labels:
+      #   http_response_code:
+      #     filters:
+      #       - label: span_kind
+      #         match: server
+      #     value:
+      #       tag: http.status_code
+      #       match: '(\d)\d{2}'
+      #       replace: '${1}xx'
 
   tracegen:
     # -- Disable the built-in demo trace generator
