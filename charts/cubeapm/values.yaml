@@ -67,6 +67,10 @@ configVars:
     #  mysql://<username>:<password>@tcp(<host>:3306)/<db_name>
     #  postgres://<username>:<password>@<host>:5432/<db_name>?sslmode=disable
     url: ""
+  # -- Tag name for environment.
+  # If set, the value of this tag in traces and metrics will be
+  # used as the value of env label in metrics.
+  envTag: ""
   # -- Minimal allowed log Level.
   # Supported values are debug, info, warn, and error.
   logLevel: "warn"
@@ -287,10 +291,6 @@ persistence:
   size: 50Gi
 
 collector:
-  # -- Tag name for environment.
-  # If set, the value of this tag in traces will be used as the
-  # value of env label in metrics.
-  envTag: ""
   otlp:
     grpc:
       # -- Disable OTLP grpc receiver

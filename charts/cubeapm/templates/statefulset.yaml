@@ -99,6 +99,10 @@ spec:
               value: {{ required "A valid configVars.baseUrl is required!" .Values.configVars.baseUrl }}
             - name: CUBE_DATABASE_URL
               value: {{ required "A valid configVars.database.url is required!" .Values.configVars.database.url }}
+            {{- if .Values.configVars.envTag }}
+            - name: CUBE_ENV_TAG
+              value: {{ .Values.configVars.envTag }}
+            {{- end }}
             - name: CUBE_HTTP_PORT
               value: {{ .Values.service.port | quote }}
             - name: CUBE_LOG_LEVEL
@@ -170,8 +174,7 @@ spec:
             - name: CUBE_CLUSTER_PORT_STATE
               value: {{ .Values.cluster.port.state | quote }}
             {{- if .Values.collector.envTag }}
-            - name: CUBE_COLLECTOR_ENV_TAG
-              value: {{ .Values.collector.envTag }}
+            {{- fail "collector.envTag is deprecated. Please use configVars.envTag instead." }}
             {{- end }}
             {{- if .Values.collector.otlp.grpc.disable }}
             - name: CUBE_COLLECTOR_OTLP_GRPC_DISABLE
