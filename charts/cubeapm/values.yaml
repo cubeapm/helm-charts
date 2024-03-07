@@ -151,6 +151,15 @@ configVars:
       #       tag: http.status_code
       #       match: '(\d)\d{2}'
       #       replace: '${1}xx'
+    slo:
+      # -- Config for SLOs (Service Level Objectives).
+      # See `values.yaml` for an example.
+      configFile: {}
+        # slos:
+        #   default:
+        #     error_budget_percent: 0.5
+        #     latency_threshold: 75ms
+        #     latency_budget_percent: 5
 
   tracegen:
     # -- Disable the built-in demo trace generator

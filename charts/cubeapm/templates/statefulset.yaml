@@ -53,6 +53,9 @@ spec:
             {{- if .Values.configVars.traces.customIndexesConfigFile }}
             - "--traces.custom-indexes-config-file=/etc/cubeapm/traces.yml"
             {{- end }}
+            {{- if .Values.configVars.metrics.slo.configFile }}
+            - "--metrics.slo.config-file=/etc/cubeapm/slo.yml"
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

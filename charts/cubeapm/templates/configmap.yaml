@@ -11,3 +11,7 @@ data:
   traces.yml: |
     {{- toYaml .Values.configVars.traces.customIndexesConfigFile | nindent 4 }}
   {{- end }}
+  {{- if .Values.configVars.metrics.slo.configFile }}
+  slo.yml: |
+    {{- toYaml .Values.configVars.metrics.slo.configFile | nindent 4 }}
+  {{- end }}
