@@ -31,3 +31,8 @@ version: 1.9.0
 appVersion: "v1.9.0"
 
 dependencies: []
+
+maintainers:
+  - name: CubeAPM
+    email: tech.support@cubeapm.com
+    url: https://cubeapm.com
