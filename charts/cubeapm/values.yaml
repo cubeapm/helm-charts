@@ -47,8 +47,14 @@ podSecurityContext: {}
 
 securityContext: {}
 # -- Configure resource requests and limits. Update according to your workload.
-# Ref: http://kubernetes.io/docs/user-guide/compute-resources/
-resources: {}
+# Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+resources:
+  requests:
+    cpu: 2
+    memory: 8Gi
+  limits:
+    cpu: 2
+    memory: 16Gi
 
 image:
   registry: docker.io
@@ -57,7 +63,7 @@ image:
   pullPolicy: IfNotPresent
 
 configVars:
-  # -- [Required] URL used by users to access Cube APM. This is used to generate URLs in emails and alerts.
+  # -- [Required] URL used by users to access CubeAPM. This is used to generate URLs in emails and alerts.
   # If you use reverse proxy and sub path specify full url (with sub path).
   # Examples: http://cube.yourdomain.com, https://yourdomain.com/cube, http://10.0.0.1:3125
   baseUrl: https://cubeapm.yourdomain.com
@@ -321,7 +327,7 @@ persistence:
   accessModes:
     - ReadWriteOnce
   # -- Persistent Volume size
-  size: 50Gi
+  size: 100Gi
 
 collector:
   otlp:
@@ -342,7 +348,7 @@ collector:
 
 cluster:
   # -- Number of pods in the cluster
-  podCount: 3
+  podCount: 1
   # -- (int) Replication factor for the ingested data.
   # Default is size_of_cluster/2 + 1
   replicationFactor: null
