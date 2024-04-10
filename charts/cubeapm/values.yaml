@@ -142,6 +142,11 @@ configVars:
     # Possible values are none, viewer, editor, admin.
     defaultRole: viewer
 
+    cookie:
+      # -- Allow authentication over HTTP.
+      # By default, CubeAPM sets secure attribute on cookies so the cookies are sent only over HTTPS.
+      insecure: false
+
   metrics:
     # -- Metrics retention period. Must be between 24h0m0s and 1440h0m0s.
     retention: 720h

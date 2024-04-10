@@ -152,6 +152,10 @@ spec:
               value: {{ .Values.configVars.auth.sysAdmins }}
             - name: CUBE_AUTH_DEFAULT_ROLE
               value: {{ .Values.configVars.auth.defaultRole }}
+            {{- if .Values.configVars.auth.cookie.insecure }}
+            - name: CUBE_AUTH_COOKIE_INSECURE
+              value: "true"
+            {{- end }}
             {{- if gt (int .Values.cluster.podCount) 1 }}
             - name: CUBE_CLUSTER_REPLICATION_FACTOR
               value: {{ .Values.cluster.replicationFactor }}
