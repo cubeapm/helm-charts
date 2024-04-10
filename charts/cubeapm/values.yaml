@@ -47,17 +47,23 @@ podSecurityContext: {}
 
 securityContext: {}
 # -- Configure resource requests and limits. Update according to your workload.
-# Ref: http://kubernetes.io/docs/user-guide/compute-resources/
-resources: {}
+# Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+resources:
+  requests:
+    cpu: 2
+    memory: 8Gi
+  limits:
+    cpu: 2
+    memory: 16Gi
 
 image:
   registry: docker.io
   repository: cubeapm/cubeapm
-  tag: v1.8.0
+  tag: v1.9.0
   pullPolicy: IfNotPresent
 
 configVars:
-  # -- [Required] URL used by users to access Cube APM. This is used to generate URLs in emails and alerts.
+  # -- [Required] URL used by users to access CubeAPM. This is used to generate URLs in emails and alerts.
   # If you use reverse proxy and sub path specify full url (with sub path).
   # Examples: http://cube.yourdomain.com, https://yourdomain.com/cube, http://10.0.0.1:3125
   baseUrl: https://cubeapm.yourdomain.com
@@ -67,6 +73,10 @@ configVars:
     #  mysql://<username>:<password>@tcp(<host>:3306)/<db_name>
     #  postgres://<username>:<password>@<host>:5432/<db_name>?sslmode=disable
     url: ""
+  # -- Tag name for environment.
+  # If set, the value of this tag in traces and metrics will be
+  # used as the value of env label in metrics.
+  envTag: ""
   # -- Minimal allowed log Level.
   # Supported values are debug, info, warn, and error.
   logLevel: "warn"
@@ -88,12 +98,6 @@ configVars:
   timeZone: UTC
   # -- [Required] Account token obtained from CubeAPM. This token is used for authentication with CubeAPM.
   token: ""
-
-  alerting:
-    alertmanager:
-      # -- Prometheus Alertmanager URL to override in-built alertmanager, e.g. http://127.0.0.1:9093.
-      # List all Alertmanager URLs separated by comma if it is running in cluster mode.
-      urls: ""
 
   alertmanager:
     charts:
@@ -140,9 +144,14 @@ configVars:
     # -- Comma separated list of email ids of users to be given sysadmin privilege.
     sysAdmins: ""
 
-  files:
-    # -- [Deprecated] Static files (e.g. graph images for alerts) retention period
-    retention: 720h
+    # -- Default role to be assigned to a new user on signup.
+    # Possible values are none, viewer, editor, admin.
+    defaultRole: viewer
+
+    cookie:
+      # -- Allow authentication over HTTP.
+      # By default, CubeAPM sets secure attribute on cookies so the cookies are sent only over HTTPS.
+      insecure: false
 
   metrics:
     # -- Metrics retention period. Must be between 24h0m0s and 1440h0m0s.
@@ -152,15 +161,24 @@ configVars:
     # -- Config for extending CubeAPM metrics with custom labels.
     # See `values.yaml` for an example.
     customLabelsConfigFile: {}
-    # custom_labels:
-    #   http_response_code:
-    #     filters:
-    #       - label: span_kind
-    #         match: server
-    #     value:
-    #       tag: http.status_code
-    #       match: '(\d)\d{2}'
-    #       replace: '${1}xx'
+      # custom_labels:
+      #   http_response_code:
+      #     filters:
+      #       - label: span_kind
+      #         match: server
+      #     value:
+      #       tag: http.status_code
+      #       match: '(\d)\d{2}'
+      #       replace: '${1}xx'
+    slo:
+      # -- Config for SLOs (Service Level Objectives).
+      # See `values.yaml` for an example.
+      configFile: {}
+        # slos:
+        #   default:
+        #     error_budget_percent: 0.5
+        #     latency_threshold: 75ms
+        #     latency_budget_percent: 5
 
   tracegen:
     # -- Disable the built-in demo trace generator
@@ -180,6 +198,12 @@ configVars:
     #       - label: http.status_code
     #         match: '4\d{2}'
 
+# -- Environment variables to be passed to CubeAPM containers.
+# Example:
+#   - name: ENV_VARIABLE_NAME
+#     value: "env_variable_value"
+extraEnvs: []
+
 service:
   # -- Annotations to CubeAPM service
   annotations: {}
@@ -187,6 +211,8 @@ service:
   type: ClusterIP
   # -- HTTP port
   port: 3125
+  # -- Port to use for internal http communication between CubeAPM nodes
+  internalPort: 3130
 
 ingress:
   # -- Enable ingress for CubeAPM
@@ -208,8 +234,8 @@ ingress:
 # It satisfies Kubernetes Ingress resources by provisioning Application Load Balancers.
 # It satisfies Kubernetes Service resources by provisioning Network Load Balancers.
 serviceTraces:
-  # -- Set up a Network Load Balancer for ingesting traces into CubeAPM from
-  # outside of k8s over TCP.
+  # -- Set up a Network Load Balancer for ingesting metrics and traces into
+  # CubeAPM from outside of k8s over TCP.
   enabled: false
   # -- Annotations to CubeAPM service
   annotations: {}
@@ -265,6 +291,26 @@ ingressTraces:
             pathType: ImplementationSpecific
     # -- Ingress TLS
     tls: []
+  metrics:
+    # -- Enable ingress for ingesting metrics into CubeAPM from outside of k8s over HTTP.
+    # Services that need to send metrics data to CubeAPM can either use
+    # <cubeapm_service_name>.<namespace>.svc.cluster.local:3030 as the endpoint
+    # (in which case this ingress is not needed) or they can use the host:port
+    # configured in this ingress. If TLS support is required, then this ingress
+    # will have to be used as CubeAPM does not handle TLS by itself.
+    enabled: false
+    # -- Ingress Class Name to be used to identify ingress controllers
+    className: ""
+    # -- Annotations to the ingress
+    annotations: {}
+    # -- Ingress Host names with their path details
+    hosts:
+      - host: cubeapm-metrics.yourdomain.com
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    # -- Ingress TLS
+    tls: []
 
 persistence:
   # -- Enable data persistence using PVC. If not enabled, data is stored in an emptyDir.
@@ -281,13 +327,9 @@ persistence:
   accessModes:
     - ReadWriteOnce
   # -- Persistent Volume size
-  size: 50Gi
+  size: 100Gi
 
 collector:
-  # -- Tag name for environment.
-  # If set, the value of this tag in traces will be used as the
-  # value of env label in metrics.
-  envTag: ""
   otlp:
     grpc:
       # -- Disable OTLP grpc receiver
@@ -306,7 +348,7 @@ collector:
 
 cluster:
   # -- Number of pods in the cluster
-  podCount: 3
+  podCount: 1
   # -- (int) Replication factor for the ingested data.
   # Default is size_of_cluster/2 + 1
   replicationFactor: null

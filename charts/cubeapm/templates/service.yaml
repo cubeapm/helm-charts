@@ -15,6 +15,10 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+    - port: {{ .Values.service.internalPort }}
+      targetPort: http-internal
+      protocol: TCP
+      name: http-internal
     {{- if not .Values.collector.otlp.grpc.disable }}
     - port: {{ .Values.collector.otlp.grpc.port }}
       targetPort: otlp-grpc

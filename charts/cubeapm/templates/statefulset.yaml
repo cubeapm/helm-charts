@@ -53,9 +53,15 @@ spec:
             {{- if .Values.configVars.traces.customIndexesConfigFile }}
             - "--traces.custom-indexes-config-file=/etc/cubeapm/traces.yml"
             {{- end }}
+            {{- if .Values.configVars.metrics.slo.configFile }}
+            - "--metrics.slo.config-file=/etc/cubeapm/slo.yml"
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
+              protocol: TCP
+            - name: http-internal
+              containerPort: {{ .Values.service.internalPort }}
               protocol: TCP
             {{- if gt (int .Values.cluster.podCount) 1 }}
             - name: cluster-dist
@@ -96,8 +102,14 @@ spec:
               value: {{ required "A valid configVars.baseUrl is required!" .Values.configVars.baseUrl }}
             - name: CUBE_DATABASE_URL
               value: {{ required "A valid configVars.database.url is required!" .Values.configVars.database.url }}
+            {{- if .Values.configVars.envTag }}
+            - name: CUBE_ENV_TAG
+              value: {{ .Values.configVars.envTag }}
+            {{- end }}
             - name: CUBE_HTTP_PORT
               value: {{ .Values.service.port | quote }}
+            - name: CUBE_HTTP_PORT_INTERNAL
+              value: {{ .Values.service.internalPort | quote }}
             - name: CUBE_LOG_LEVEL
               value: {{ .Values.configVars.logLevel }}
             - name: CUBE_SHUTDOWN_DELAY
@@ -110,8 +122,6 @@ spec:
               value: {{ required "A valid configVars.smtp.url is required!" .Values.configVars.smtp.url }}
             - name: CUBE_TIME_ZONE
               value: {{ .Values.configVars.timeZone }}
-            - name: CUBE_ALERTING_ALERTMANAGER_URLS
-              value: {{ .Values.configVars.alerting.alertmanager.urls }}
             {{- if .Values.configVars.alertmanager.charts.disable }}
             - name: CUBE_ALERTMANAGER_CHARTS_DISABLE
               value: "true"
@@ -140,6 +150,12 @@ spec:
             {{- end }}
             - name: CUBE_AUTH_SYS_ADMINS
               value: {{ .Values.configVars.auth.sysAdmins }}
+            - name: CUBE_AUTH_DEFAULT_ROLE
+              value: {{ .Values.configVars.auth.defaultRole }}
+            {{- if .Values.configVars.auth.cookie.insecure }}
+            - name: CUBE_AUTH_COOKIE_INSECURE
+              value: "true"
+            {{- end }}
             {{- if gt (int .Values.cluster.podCount) 1 }}
             - name: CUBE_CLUSTER_REPLICATION_FACTOR
               value: {{ .Values.cluster.replicationFactor }}
@@ -167,8 +183,7 @@ spec:
             - name: CUBE_CLUSTER_PORT_STATE
               value: {{ .Values.cluster.port.state | quote }}
             {{- if .Values.collector.envTag }}
-            - name: CUBE_COLLECTOR_ENV_TAG
-              value: {{ .Values.collector.envTag }}
+            {{- fail "collector.envTag is deprecated. Please use configVars.envTag instead." }}
             {{- end }}
             {{- if .Values.collector.otlp.grpc.disable }}
             - name: CUBE_COLLECTOR_OTLP_GRPC_DISABLE
@@ -186,8 +201,6 @@ spec:
             - name: CUBE_COLLECTOR_OTLP_HTTP_CORS_ORIGINS
               value: {{ .Values.collector.otlp.http.cors.origins }}
             {{- end }}
-            - name: CUBE_FILES_RETENTION
-              value: {{ .Values.configVars.files.retention }}
             - name: CUBE_METRICS_RETENTION
               value: {{ .Values.configVars.metrics.retention }}
             - name: CUBE_METRICS_UPDATE_INTERVAL
@@ -198,6 +211,10 @@ spec:
             {{- end }}
             - name: CUBE_TRACES_RETENTION
               value: {{ .Values.configVars.traces.retention }}
+            # add extraEnvs
+            {{- with .Values.extraEnvs }}
+            {{- . | toYaml | nindent 12 }}
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /health
