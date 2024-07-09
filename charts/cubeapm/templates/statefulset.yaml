@@ -90,6 +90,11 @@ spec:
               containerPort: {{ .Values.collector.otlp.http.port }}
               protocol: TCP
             {{- end }}
+            {{- if not .Values.collector.nr8t.disable }}
+            - name: nr8t
+              containerPort: {{ .Values.collector.nr8t.port }}
+              protocol: TCP
+            {{- end }}
           env:
             # {{- range $host := .Values.ingress.hosts }}
             # {{- range .paths }}
@@ -200,6 +205,13 @@ spec:
               value: {{ .Values.collector.otlp.http.port | quote }}
             - name: CUBE_COLLECTOR_OTLP_HTTP_CORS_ORIGINS
               value: {{ .Values.collector.otlp.http.cors.origins }}
+            {{- end }}
+            {{- if .Values.collector.nr8t.disable }}
+            - name: CUBE_COLLECTOR_NR_8T_DISABLE
+              value: "true"
+            {{- else }}
+            - name: CUBE_COLLECTOR_NR_8T_PORT
+              value: {{ .Values.collector.nr8t.port | quote }}
             {{- end }}
             - name: CUBE_METRICS_RETENTION
               value: {{ .Values.configVars.metrics.retention }}

@@ -32,6 +32,13 @@ spec:
       # appProtocol:
       name: otlp-http
     {{- end }}
+    {{- if not .Values.collector.nr8t.disable }}
+    - port: {{ .Values.collector.nr8t.port }}
+      targetPort: nr8t
+      protocol: TCP
+      # appProtocol:
+      name: nr8t
+    {{- end }}
   selector:
     {{- include "cubeapm.selectorLabels" . | nindent 4 }}
 {{- end }}

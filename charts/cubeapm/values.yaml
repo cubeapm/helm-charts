@@ -311,6 +311,30 @@ ingressTraces:
             pathType: ImplementationSpecific
     # -- Ingress TLS
     tls: []
+  nr8t:
+    # -- Enable ingress for ingesting traces into CubeAPM via New Relic Infinite Tracing.
+    # Services that need to send traces data to CubeAPM can use the host:port
+    # configured in this ingress.
+    #
+    # Note that this ingress must be configured to use GRPC protocol for
+    # forwarding traffic to the service. For kubernetes nginx ingress
+    # controller, this can be achieved by setting the annotation
+    # nginx.ingress.kubernetes.io/backend-protocol: GRPC
+    #
+    # Note also that TLS is mandatory for New Relic Infinite Tracing.
+    enabled: false
+    # -- Ingress Class Name to be used to identify ingress controllers
+    className: ""
+    # -- Annotations to the ingress
+    annotations: {}
+    # -- Ingress Host names with their path details
+    hosts:
+      - host: cubeapm-traces-nr8t.yourdomain.com
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    # -- Ingress TLS
+    tls: []
 
 persistence:
   # -- Enable data persistence using PVC. If not enabled, data is stored in an emptyDir.
@@ -345,6 +369,11 @@ collector:
         # -- Comma separated list of allowed origins for CORS requests.
         # Examples: "http://*.domain.com", "*"
         origins: ""
+  nr8t:
+    # -- Disable New Relic Infinite Tracing grpc receiver
+    disable: false
+    # -- Port to bind New Relic Infinite Tracing grpc receiver on
+    port: 3124
 
 cluster:
   # -- Number of pods in the cluster
