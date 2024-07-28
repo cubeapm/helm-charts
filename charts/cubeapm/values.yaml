@@ -59,7 +59,7 @@ resources:
 image:
   registry: docker.io
   repository: cubeapm/cubeapm
-  tag: v1.9.0
+  tag: v1.10.0
   pullPolicy: IfNotPresent
 
 configVars:
@@ -72,6 +72,7 @@ configVars:
     # Example:
     #  mysql://<username>:<password>@tcp(<host>:3306)/<db_name>
     #  postgres://<username>:<password>@<host>:5432/<db_name>?sslmode=disable
+    # Note: A-Za-z0-9.-_ characters are safe for use in password. Other characters can cause problems.
     url: ""
   # -- Tag name for environment.
   # If set, the value of this tag in traces and metrics will be
@@ -90,6 +91,7 @@ configVars:
     # -- [Required] URL of SMTP server for sending emails, e.g., reset password email, alert notifications.
     # Example:
     #  smtp://<username>:<password>@<mailserver>:25/?disable_starttls=false
+    # Note: username and password must be url-encoded to escape any special characters.
     url: ""
   # -- Timezone of CubeAPM users. While most of the timezone related operations are done on the browser
   # using browser's time zone setting, a few operations need to be performed on the server and they use
@@ -120,6 +122,7 @@ configVars:
       # Example:
       #  mysql://<username>:<password>@tcp(<host>:3306)/<db_name>
       #  postgres://<username>:<password>@<host>:5432/<db_name>?sslmode=disable
+      # Note: A-Za-z0-9.-_ characters are safe for use in password. Other characters can cause problems.
       url: ""
     key:
       # -- [Required] Encryption key for session data. Must be 32 characters long.
@@ -156,8 +159,8 @@ configVars:
   metrics:
     # -- Metrics retention period. Must be between 24h0m0s and 1440h0m0s.
     retention: 720h
-    # -- Metrics update interval. Must be between 500ms and 1m0s.
-    updateInterval: 15s
+    # -- Metrics update interval. Must be between 5s and 1m0s.
+    updateInterval: 30s
     # -- Config for extending CubeAPM metrics with custom labels.
     # See `values.yaml` for an example.
     customLabelsConfigFile: {}
@@ -294,7 +297,7 @@ ingressTraces:
   metrics:
     # -- Enable ingress for ingesting metrics into CubeAPM from outside of k8s over HTTP.
     # Services that need to send metrics data to CubeAPM can either use
-    # <cubeapm_service_name>.<namespace>.svc.cluster.local:3030 as the endpoint
+    # <cubeapm_service_name>.<namespace>.svc.cluster.local:3130 as the endpoint
     # (in which case this ingress is not needed) or they can use the host:port
     # configured in this ingress. If TLS support is required, then this ingress
     # will have to be used as CubeAPM does not handle TLS by itself.
@@ -374,6 +377,21 @@ collector:
     disable: false
     # -- Port to bind New Relic Infinite Tracing grpc receiver on
     port: 3124
+  # -- Config for transforming ingested spans before further processing.
+  # See `values.yaml` for an example.
+  spanTransformsConfigFile: {}
+    # span_transforms:
+    #   - filters:
+    #       - label: span_kind
+    #         match: server
+    #       - label: span_name
+    #         match: global.500_handler
+    #       - label: request.uri
+    #         match: /ping
+    #     value:
+    #       tag: status_code
+    #       match: ERROR
+    #       replace: UNSET
 
 cluster:
   # -- Number of pods in the cluster

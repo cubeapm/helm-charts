@@ -56,6 +56,9 @@ spec:
             {{- if .Values.configVars.metrics.slo.configFile }}
             - "--metrics.slo.config-file=/etc/cubeapm/slo.yml"
             {{- end }}
+            {{- if .Values.collector.spanTransformsConfigFile }}
+            - "--collector.span-transforms-config-file=/etc/cubeapm/span_transforms.yml"
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -123,8 +126,10 @@ spec:
             - name: CUBE_SMTP_FROM
               value: {{ .Values.configVars.smtp.from }}
             {{- end }}
+            {{- if .Values.configVars.smtp.url }}
             - name: CUBE_SMTP_URL
-              value: {{ required "A valid configVars.smtp.url is required!" .Values.configVars.smtp.url }}
+              value: {{ .Values.configVars.smtp.url }}
+            {{- end }}
             - name: CUBE_TIME_ZONE
               value: {{ .Values.configVars.timeZone }}
             {{- if .Values.configVars.alertmanager.charts.disable }}
