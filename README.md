@@ -15,6 +15,10 @@ To install the cubeapm chart:
 
     helm install my-cubeapm cubeapm/cubeapm
 
+To update an existing cubeapm installation:
+
+    helm upgrade my-cubeapm cubeapm/cubeapm
+
 To uninstall the chart:
 
     helm delete my-cubeapm

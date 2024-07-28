@@ -15,3 +15,7 @@ data:
   slo.yml: |
     {{- toYaml .Values.configVars.metrics.slo.configFile | nindent 4 }}
   {{- end }}
+  {{- if .Values.collector.spanTransformsConfigFile }}
+  span_transforms.yml: |
+    {{- toYaml .Values.collector.spanTransformsConfigFile | nindent 4 }}
+  {{- end }}
