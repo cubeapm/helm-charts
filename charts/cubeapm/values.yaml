@@ -59,7 +59,7 @@ resources:
 image:
   registry: docker.io
   repository: cubeapm/cubeapm
-  tag: v1.10.0
+  tag: v1.11.0
   pullPolicy: IfNotPresent
 
 configVars:
@@ -75,8 +75,8 @@ configVars:
     # Note: A-Za-z0-9.-_ characters are safe for use in password. Other characters can cause problems.
     url: ""
   # -- Tag name for environment.
-  # If set, the value of this tag in traces and metrics will be
-  # used as the value of env label in metrics.
+  # If set, the value of this tag in logs, metrics, and traces
+  # will be used to segragate them in the UI.
   envTag: ""
   # -- Minimal allowed log Level.
   # Supported values are debug, info, warn, and error.
@@ -115,6 +115,32 @@ configVars:
         # Slack bot tokens start with 'xoxb'.
         # Refer https://docs.cubeapm.com/install/configure-cubeapm/connect-with-slack-for-alerting for guidance.
         token: ""
+
+  alerts:
+    # -- Config for alerts.
+    # See `values.yaml` for an example.
+    configFile: {}
+      # receivers:
+      #   - name: my receiver group
+      #     email_configs:
+      #       - to: someone@yourdomain.com
+      # alerts:
+      #   - status: ACTIVE
+      #     query: '300'
+      #     condition: '>'
+      #     threshold: 10
+      #     threshold_critical: 10.50
+      #     evaluation_interval: 30
+      #     wait_for: 30
+      #     repeat_after: 900
+      #     name: file alert 1
+      #     group: file_alerts
+      #     receiver_names:
+      #       - my receiver group
+      #     receiver:
+      #       name: '101'
+      #       email_configs:
+      #         - to: someone@yourdomain.com
 
   auth:
     database:
@@ -156,10 +182,18 @@ configVars:
       # By default, CubeAPM sets secure attribute on cookies so the cookies are sent only over HTTPS.
       insecure: false
 
-  metrics:
-    # -- Metrics retention period. Must be between 24h0m0s and 1440h0m0s.
+  files:
+    # -- Static files (e.g. javascript source maps) retention period
     retention: 720h
-    # -- Metrics update interval. Must be between 5s and 1m0s.
+
+  logs:
+    # -- Logs retention period. Must be between 24h and 1440h.
+    retention: 24h
+
+  metrics:
+    # -- Metrics retention period. Must be between 24h and 1440h.
+    retention: 720h
+    # -- Metrics update interval. Must be between 5s and 1m.
     updateInterval: 30s
     # -- Config for extending CubeAPM metrics with custom labels.
     # See `values.yaml` for an example.
@@ -188,8 +222,10 @@ configVars:
     disable: false
 
   traces:
-    # -- Traces retention period. Must be between 1h0m0s and 720h0m0s.
+    # -- Traces retention period. Must be between 24h and 1440h.
     retention: 72h
+    # -- Minimum query duration for labeling database queries as slow.
+    slowQueryThreshold: 500ms
     # -- Config for creating custom indexes on traces.
     # See `values.yaml` for an example.
     customIndexesConfigFile: {}

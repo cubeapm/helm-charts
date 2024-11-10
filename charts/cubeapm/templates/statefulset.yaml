@@ -47,6 +47,9 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - "--data-dir=/var/lib/cubeapm/data"
+            {{- if .Values.configVars.alerts.configFile }}
+            - "--alerts.config-file=/etc/cubeapm/alerts.yml"
+            {{- end }}
             {{- if .Values.configVars.metrics.customLabelsConfigFile }}
             - "--metrics.custom-labels-config-file=/etc/cubeapm/metrics.yml"
             {{- end }}
@@ -218,6 +221,10 @@ spec:
             - name: CUBE_COLLECTOR_NR_8T_PORT
               value: {{ .Values.collector.nr8t.port | quote }}
             {{- end }}
+            - name: CUBE_FILES_RETENTION
+              value: {{ .Values.configVars.files.retention }}
+            - name: CUBE_LOGS_RETENTION
+              value: {{ .Values.configVars.logs.retention }}
             - name: CUBE_METRICS_RETENTION
               value: {{ .Values.configVars.metrics.retention }}
             - name: CUBE_METRICS_UPDATE_INTERVAL
@@ -228,6 +235,8 @@ spec:
             {{- end }}
             - name: CUBE_TRACES_RETENTION
               value: {{ .Values.configVars.traces.retention }}
+            - name: CUBE_TRACES_SLOW_QUERY_THRESHOLD
+              value: {{ .Values.configVars.traces.slowQueryThreshold }}
             # add extraEnvs
             {{- with .Values.extraEnvs }}
             {{- . | toYaml | nindent 12 }}
