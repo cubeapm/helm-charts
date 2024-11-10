@@ -3,6 +3,10 @@ kind: ConfigMap
 metadata:
   name: {{ include "cubeapm.fullname" . }}
 data:
+  {{- if .Values.configVars.alerts.configFile }}
+  alerts.yml: |
+    {{- toYaml .Values.configVars.alerts.configFile | nindent 4 }}
+  {{- end }}
   {{- if .Values.configVars.metrics.customLabelsConfigFile }}
   metrics.yml: |
     {{- toYaml .Values.configVars.metrics.customLabelsConfigFile | nindent 4 }}
