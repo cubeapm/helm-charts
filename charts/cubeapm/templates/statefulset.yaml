@@ -182,7 +182,7 @@ spec:
             {{- $list := list }}
             {{- $fullName := include "cubeapm.fullname" . }}
             {{- range $i := until (int .Values.cluster.podCount) }}
-            {{- $list = append $list (printf "%s-%d.%s" ($fullName) ($i) ($fullName)) }}
+            {{- $list = append $list (printf "%s-%d.%s.%s.svc.cluster.local" ($fullName) ($i) ($fullName) ($.Release.Namespace)) }}
             {{- end }}
             - name: CUBE_CLUSTER_PEERS
               value: {{ join "," $list }}
