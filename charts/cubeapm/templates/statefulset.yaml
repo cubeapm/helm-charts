@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "cubeapm.labels" . | nindent 4 }}
 spec:
-  serviceName: {{ include "cubeapm.fullname" . }}
+  serviceName: {{ include "cubeapm.fullname" . | trunc 54 | trimSuffix "-" }}-headless
   replicas: {{ .Values.cluster.podCount }}
   selector:
     matchLabels:
@@ -182,7 +182,7 @@ spec:
             {{- $list := list }}
             {{- $fullName := include "cubeapm.fullname" . }}
             {{- range $i := until (int .Values.cluster.podCount) }}
-            {{- $list = append $list (printf "%s-%d.%s.%s.svc.cluster.local" ($fullName) ($i) ($fullName) ($.Release.Namespace)) }}
+            {{- $list = append $list (printf "%s-%d.%s-headless" ($fullName) ($i) ($fullName | trunc 54 | trimSuffix "-")) }}
             {{- end }}
             - name: CUBE_CLUSTER_PEERS
               value: {{ join "," $list }}
