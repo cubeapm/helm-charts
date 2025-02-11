@@ -434,7 +434,7 @@ cluster:
   podCount: 1
   # -- (int) Replication factor for the ingested data.
   # Default is size_of_cluster/2 + 1
-  replicationFactor: null
+  replicationFactor: 0
   advertise:
     # -- Explicit address to advertise in cluster, e.g. 10.0.0.1.
     # If not specified, CubeAPM will try to detect the address automatically.
