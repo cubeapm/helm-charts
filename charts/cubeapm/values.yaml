@@ -44,6 +44,7 @@ affinity: {}
 tolerations: []
 topologySpreadConstraints: []
 podSecurityContext: {}
+podCustomLabels: {}
 
 securityContext: {}
 # -- Configure resource requests and limits. Update according to your workload.
