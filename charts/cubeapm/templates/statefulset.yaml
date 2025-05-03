@@ -172,9 +172,11 @@ spec:
             - name: CUBE_AUTH_COOKIE_INSECURE
               value: "true"
             {{- end }}
-            {{- if and (gt (int .Values.cluster.podCount) 1) (.Values.cluster.replicationFactor) }}
+            {{- if gt (int .Values.cluster.podCount) 1 }}
+            {{- if .Values.cluster.replicationFactor }}
             - name: CUBE_CLUSTER_REPLICATION_FACTOR
               value: {{ .Values.cluster.replicationFactor | quote }}
+            {{- end }}
             - name: CUBE_CLUSTER_ADVERTISE_ADDRESS
               # value: $(POD_IP)
               value: {{ .Values.cluster.advertise.address }}
