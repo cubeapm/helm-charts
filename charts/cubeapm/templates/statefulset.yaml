@@ -115,7 +115,7 @@ spec:
             - name: CUBE_BASE_URL
               value: {{ required "A valid configVars.baseUrl is required!" .Values.configVars.baseUrl }}
             - name: CUBE_DATABASE_URL
-              value: {{ required "A valid configVars.database.url is required!" .Values.configVars.database.url }}
+              value: {{ .Values.configVars.database.url }}
             {{- if .Values.configVars.envTag }}
             - name: CUBE_ENV_TAG
               value: {{ .Values.configVars.envTag }}
@@ -142,16 +142,24 @@ spec:
             - name: CUBE_ALERTMANAGER_CHARTS_DISABLE
               value: "true"
             {{- end }}
+            - name: CUBE_ALERTMANAGER_JIRA_SITE_NAME
+              value: {{ .Values.configVars.alertmanager.jira.siteName }}
+            - name: CUBE_ALERTMANAGER_JIRA_TOKEN
+              value: {{ .Values.configVars.alertmanager.jira.token }}
+            - name: CUBE_ALERTMANAGER_JIRA_TOKEN_EXPIRY_DATE
+              value: {{ .Values.configVars.alertmanager.jira.tokenExpiryDate }}
+            - name: CUBE_ALERTMANAGER_JIRA_USER_EMAIL
+              value: {{ .Values.configVars.alertmanager.jira.userEmail }}
             - name: CUBE_ALERTMANAGER_OAUTH_PAGERDUTY_APP_ID
               value: {{ .Values.configVars.alertmanager.oauth.pagerduty.appId }}
             - name: CUBE_ALERTMANAGER_OAUTH_SLACK_TOKEN
               value: {{ .Values.configVars.alertmanager.oauth.slack.token }}
+            - name: CUBE_ALERTMANAGER_OPSGENIE_TOKENS
+              value: {{ .Values.configVars.alertmanager.opsgenie.tokens }}
             - name: CUBE_AUTH_DATABASE_URL
-              value: {{ required "A valid configVars.auth.database.url is required!" .Values.configVars.auth.database.url }}
+              value: {{ .Values.configVars.auth.database.url }}
             - name: CUBE_AUTH_KEY_SESSION
               value: {{ required "A valid configVars.auth.key.session is required!" .Values.configVars.auth.key.session }}
-            - name: CUBE_AUTH_KEY_TOKENS
-              value: {{ required "A valid configVars.auth.key.tokens is required!" .Values.configVars.auth.key.tokens }}
             {{- if or .Values.configVars.auth.oidc.github.clientId .Values.configVars.auth.oidc.github.clientSecret }}
             - name: CUBE_AUTH_OIDC_GITHUB_CLIENT_ID
               value: {{ required "A valid configVars.auth.oidc.github.clientId is also required if configVars.auth.oidc.github.clientSecret is set!" .Values.configVars.auth.oidc.github.clientId }}
@@ -164,14 +172,12 @@ spec:
             - name: CUBE_AUTH_OIDC_GOOGLE_CLIENT_SECRET
               value: {{ required "A valid configVars.auth.oidc.google.clientSecret is also required if configVars.auth.oidc.google.clientId is set!" .Values.configVars.auth.oidc.google.clientSecret }}
             {{- end }}
+            - name: CUBE_AUTH_SESSION_LIFESPAN
+              value: {{ .Values.configVars.auth.session.lifespan }}
             - name: CUBE_AUTH_SYS_ADMINS
               value: {{ .Values.configVars.auth.sysAdmins }}
             - name: CUBE_AUTH_DEFAULT_ROLE
               value: {{ .Values.configVars.auth.defaultRole }}
-            {{- if .Values.configVars.auth.cookie.insecure }}
-            - name: CUBE_AUTH_COOKIE_INSECURE
-              value: "true"
-            {{- end }}
             {{- if gt (int .Values.cluster.podCount) 1 }}
             {{- if .Values.cluster.replicationFactor }}
             - name: CUBE_CLUSTER_REPLICATION_FACTOR
@@ -230,6 +236,28 @@ spec:
               value: {{ .Values.configVars.files.retention }}
             - name: CUBE_LOGS_RETENTION
               value: {{ .Values.configVars.logs.retention }}
+            {{- if .Values.configVars.logs.backup.destination }}
+            - name: CUBE_LOGS_BACKUP_CONCURRENCY
+              value: {{ .Values.configVars.logs.backup.concurrency | quote }}
+            - name: CUBE_LOGS_BACKUP_DESTINATION
+              value: {{ .Values.configVars.logs.backup.destination }}
+            - name: CUBE_LOGS_BACKUP_S3_CUSTOM_ENDPOINT
+              value: {{ .Values.configVars.logs.backup.s3.customEndpoint }}
+            {{- if .Values.configVars.logs.backup.s3.forcePathStyle }}
+            - name: CUBE_LOGS_BACKUP_S3_FORCE_PATH_STYLE
+              value: "true"
+            {{- end }}
+            - name: CUBE_LOGS_BACKUP_S3_STORAGE_CLASS
+              value: {{ .Values.configVars.logs.backup.s3.storageClass }}
+            {{- end }}
+            - name: CUBE_LOGS_DATADOG_STREAM_FIELDS
+              value: {{ .Values.configVars.logs.datadog.streamFields }}
+            - name: CUBE_LOGS_DATADOG_IGNORE_FIELDS
+              value: {{ .Values.configVars.logs.datadog.ignoreFields }}
+            - name: CUBE_LOGS_NEWRELIC_STREAM_FIELDS
+              value: {{ .Values.configVars.logs.newrelic.streamFields }}
+            - name: CUBE_LOGS_NEWRELIC_IGNORE_FIELDS
+              value: {{ .Values.configVars.logs.newrelic.ignoreFields }}
             - name: CUBE_METRICS_RETENTION
               value: {{ .Values.configVars.metrics.retention }}
             - name: CUBE_METRICS_UPDATE_INTERVAL

@@ -55,12 +55,12 @@ resources:
     memory: 8Gi
   limits:
     cpu: 2
-    memory: 16Gi
+    memory: 8Gi
 
 image:
   registry: docker.io
   repository: cubeapm/cubeapm
-  tag: v1.11.0
+  tag: v1.12.0
   pullPolicy: IfNotPresent
 
 configVars:
@@ -89,7 +89,7 @@ configVars:
     # -- Email address of sender. Your SMTP server must be
     # configured to allow sending emails from this address.
     from: ""
-    # -- [Required] URL of SMTP server for sending emails, e.g., reset password email, alert notifications.
+    # -- URL of SMTP server for sending emails, e.g., reset password email, alert notifications.
     # Example:
     #  smtp://<username>:<password>@<mailserver>:25/?disable_starttls=false
     # Note: username and password must be url-encoded to escape any special characters.
@@ -106,6 +106,16 @@ configVars:
     charts:
       # -- Disable charts in alert notifications
       disable: false
+    jira:
+      # -- Name of the site for sending alert notifications on Jira.
+      # If you access Jira on https://youraccountid.atlassian.net, the site name is youraccountid.
+      siteName: ""
+      # -- API token for sending alert notifications on Jira.
+      token: ""
+      # -- Expiry date of the Jira API token in YYYY-MM-DD format. Will be used to remind when the token is about to expire.
+      tokenExpiryDate: ""
+      # -- Email address of Jira user for sending alert notifications on Jira.
+      userEmail: ""
     oauth:
       pagerduty:
         # -- App ID for sending alert notifications on PagerDuty.
@@ -116,6 +126,10 @@ configVars:
         # Slack bot tokens start with 'xoxb'.
         # Refer https://docs.cubeapm.com/install/configure-cubeapm/connect-with-slack-for-alerting for guidance.
         token: ""
+    opsgenie:
+      # -- API tokens for sending alert notifications on Opsgenie.
+      # Format: team1:token1,team2:token2,...,teamN:tokenN
+      tokens: ""
 
   alerts:
     # -- Config for alerts.
@@ -155,9 +169,6 @@ configVars:
       # -- [Required] Encryption key for session data. Must be 32 characters long.
       # Can use hex encoded UUID without dashes.
       session: ""
-      # -- [Required] Encryption key for tokens. Must be 32 characters long.
-      # Can use hex encoded UUID without dashes.
-      tokens: ""
     oidc:
       github:
         # -- Client ID for Sign in with GitHub.
@@ -171,28 +182,49 @@ configVars:
         clientId: ""
         # -- Client secret for Sign in with Google
         clientSecret: ""
+    session:
+      # -- Defines how long a session is active. Once that lifespan has been reached, the user needs to sign in again.
+      lifespan: 24h
     # -- Comma separated list of email ids of users to be given sysadmin privilege.
     sysAdmins: ""
-
     # -- Default role to be assigned to a new user on signup.
     # Possible values are none, viewer, editor, admin.
     defaultRole: viewer
-
-    cookie:
-      # -- Allow authentication over HTTP.
-      # By default, CubeAPM sets secure attribute on cookies so the cookies are sent only over HTTPS.
-      insecure: false
 
   files:
     # -- Static files (e.g. javascript source maps) retention period
     retention: 720h
 
   logs:
-    # -- Logs retention period. Must be between 24h and 1440h.
+    # -- Logs retention period. Must be at least 24h.
     retention: 24h
+    backup:
+      # -- The number of concurrent workers. 0 means equal to number of available CPUs.
+      concurrency: 0
+      # -- Where to put the backup on the remote storage.
+      # Example: s3://bucket/path/to/backup, gs://bucket/path/to/backup, azblob://container/path/to/backup or fs:///path/to/local/backup/dir
+      destination: ""
+      s3:
+        # -- Custom S3 endpoint for use with S3-compatible storages (e.g. MinIO). S3 is used if not set.
+        customEndpoint: ""
+        # -- Prefixing endpoint with bucket name when set false.
+        forcePathStyle: false
+        # -- The Storage Class applied to objects uploaded to AWS S3. Supported values are: GLACIER, DEEP_ARCHIVE, GLACIER_IR, INTELLIGENT_TIERING, ONEZONE_IA, OUTPOSTS, REDUCED_REDUNDANCY, STANDARD, STANDARD_IA.
+        # See https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html.
+        storageClass: ""
+    datadog:
+      # -- Comma separated list of Datadog tags to be used as stream fields.
+      streamFields: ""
+      # -- Comma separated list of Datadog tags to ignore.
+      ignoreFields: ""
+    newrelic:
+      # -- Comma separated list of New Relic tags to be used as stream fields.
+      streamFields: "service.name,faas.name"
+      # -- Comma separated list of New Relic tags to ignore.
+      ignoreFields: ""
 
   metrics:
-    # -- Metrics retention period. Must be between 24h and 1440h.
+    # -- Metrics retention period. Must be at least 24h.
     retention: 720h
     # -- Metrics update interval. Must be between 5s and 1m.
     updateInterval: 30s
@@ -223,7 +255,7 @@ configVars:
     disable: false
 
   traces:
-    # -- Traces retention period. Must be between 24h and 1440h.
+    # -- Traces retention period. Must be at least 24h.
     retention: 72h
     # -- Minimum query duration for labeling database queries as slow.
     slowQueryThreshold: 500ms
