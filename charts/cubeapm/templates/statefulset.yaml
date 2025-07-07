@@ -72,6 +72,11 @@ spec:
             - name: http-internal
               containerPort: {{ .Values.service.internalPort }}
               protocol: TCP
+            {{- if .Values.service.admin.enabled }}
+            - name: http-admin
+              containerPort: {{ .Values.service.admin.port }}
+              protocol: TCP
+            {{- end }}
             {{- if gt (int .Values.cluster.podCount) 1 }}
             - name: cluster-dist
               containerPort: {{ .Values.cluster.port.distributor }}
@@ -124,6 +129,14 @@ spec:
               value: {{ .Values.service.port | quote }}
             - name: CUBE_HTTP_PORT_INTERNAL
               value: {{ .Values.service.internalPort | quote }}
+            {{- if .Values.service.admin.enabled }}
+            - name: CUBE_HTTP_HOST_ADMIN
+              value: '0.0.0.0'
+            - name: CUBE_HTTP_PORT_ADMIN
+              value: {{ .Values.service.admin.port | quote }}
+            - name: CUBE_HTTP_TOKEN_ADMIN
+              value: {{ .Values.service.admin.token | quote }}
+            {{- end }}
             - name: CUBE_LOG_LEVEL
               value: {{ .Values.configVars.logLevel }}
             - name: CUBE_SHUTDOWN_DELAY
