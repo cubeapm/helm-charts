@@ -281,10 +281,22 @@ service:
   annotations: {}
   # -- Service type
   type: ClusterIP
-  # -- HTTP port
+  # -- HTTP port for UI
   port: 3125
   # -- Port to use for internal http communication between CubeAPM nodes
   internalPort: 3130
+  admin:
+    # -- Enable admin http server for managing CubeAPM (e.g. delete user accounts) via APIs.
+    enabled: false
+    # -- Port to bind admin http server on
+    port: 3199
+    # -- Admin http server authentication token.
+    # This token is used to authenticate requests to the admin http server.
+    # If not set, the admin http server will not require authentication.
+    # If set, the token must be provided in the `Authorization` header of the requests.
+    # Example:
+    #   Authorization: Bearer <token>
+    token: ""
 
 ingress:
   # -- Enable ingress for CubeAPM
