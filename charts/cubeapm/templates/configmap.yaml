@@ -3,6 +3,93 @@ kind: ConfigMap
 metadata:
   name: {{ include "cubeapm.fullname" . }}
 data:
+  config.properties: |
+    # CubeAPM Configuration Properties
+    # Sensitive values are left empty and can be populated via secrets
+    
+    # Basic Configuration
+    cube.baseUrl={{ .Values.configVars.baseUrl }}
+    cube.envTag={{ .Values.configVars.envTag | default "" }}
+    cube.logLevel={{ .Values.configVars.logLevel }}
+    cube.shutdownDelay={{ .Values.configVars.shutdownDelay }}
+    cube.timeZone={{ .Values.configVars.timeZone }}
+    
+    # Database Configuration
+    cube.database.url={{ .Values.configVars.database.url }}
+    
+    # SMTP Configuration
+    cube.smtp.from={{ .Values.configVars.smtp.from | default "" }}
+    cube.smtp.url={{ .Values.configVars.smtp.url | default "" }}
+    
+    # Alert Manager Configuration
+    cube.alertmanager.charts.disable={{ .Values.configVars.alertmanager.charts.disable | default false }}
+    cube.alertmanager.jira.siteName={{ .Values.configVars.alertmanager.jira.siteName | default "" }}
+    cube.alertmanager.jira.token=
+    cube.alertmanager.jira.tokenExpiryDate={{ .Values.configVars.alertmanager.jira.tokenExpiryDate | default "" }}
+    cube.alertmanager.jira.userEmail={{ .Values.configVars.alertmanager.jira.userEmail | default "" }}
+    cube.alertmanager.oauth.pagerduty.appId={{ .Values.configVars.alertmanager.oauth.pagerduty.appId | default "" }}
+    cube.alertmanager.oauth.slack.token=
+    cube.alertmanager.opsgenie.tokens=
+    
+    # Authentication Configuration
+    cube.auth.database.url={{ .Values.configVars.auth.database.url | default "" }}
+    cube.auth.key.session=
+    cube.auth.oidc.github.clientId={{ .Values.configVars.auth.oidc.github.clientId | default "" }}
+    cube.auth.oidc.github.clientSecret=
+    cube.auth.oidc.google.clientId={{ .Values.configVars.auth.oidc.google.clientId | default "" }}
+    cube.auth.oidc.google.clientSecret=
+    cube.auth.session.lifespan={{ .Values.configVars.auth.session.lifespan }}
+    cube.auth.sysAdmins={{ .Values.configVars.auth.sysAdmins }}
+    cube.auth.defaultRole={{ .Values.configVars.auth.defaultRole }}
+    
+    # Cluster Configuration
+    cube.cluster.replicationFactor={{ .Values.cluster.replicationFactor | default 1 }}
+    cube.cluster.advertise.address={{ .Values.cluster.advertise.address | default "" }}
+    cube.cluster.advertise.allowInsecure={{ .Values.cluster.advertise.allowInsecure | default false }}
+    cube.cluster.port.distributor={{ .Values.cluster.port.distributor }}
+    cube.cluster.port.read={{ .Values.cluster.port.read }}
+    cube.cluster.port.write={{ .Values.cluster.port.write }}
+    cube.cluster.port.state={{ .Values.cluster.port.state }}
+    
+    # Collector Configuration
+    cube.collector.otlp.grpc.disable={{ .Values.collector.otlp.grpc.disable | default false }}
+    cube.collector.otlp.grpc.port={{ .Values.collector.otlp.grpc.port | default 4317 }}
+    cube.collector.otlp.http.disable={{ .Values.collector.otlp.http.disable | default false }}
+    cube.collector.otlp.http.port={{ .Values.collector.otlp.http.port | default 4318 }}
+    cube.collector.otlp.http.cors.origins={{ .Values.collector.otlp.http.cors.origins | default "*" }}
+    cube.collector.nr8t.disable={{ .Values.collector.nr8t.disable | default false }}
+    cube.collector.nr8t.port={{ .Values.collector.nr8t.port | default 4319 }}
+    
+    # Retention Configuration
+    cube.files.retention={{ .Values.configVars.files.retention }}
+    cube.logs.retention={{ .Values.configVars.logs.retention }}
+    cube.logs.backup.destination={{ .Values.configVars.logs.backup.destination | default "" }}
+    cube.logs.backup.concurrency={{ .Values.configVars.logs.backup.concurrency | default 1 }}
+    cube.logs.backup.s3.customEndpoint={{ .Values.configVars.logs.backup.s3.customEndpoint | default "" }}
+    cube.logs.backup.s3.forcePathStyle={{ .Values.configVars.logs.backup.s3.forcePathStyle | default false }}
+    cube.logs.backup.s3.storageClass={{ .Values.configVars.logs.backup.s3.storageClass | default "" }}
+    cube.logs.datadog.streamFields={{ .Values.configVars.logs.datadog.streamFields | default "" }}
+    cube.logs.datadog.ignoreFields={{ .Values.configVars.logs.datadog.ignoreFields | default "" }}
+    cube.logs.newrelic.streamFields={{ .Values.configVars.logs.newrelic.streamFields | default "" }}
+    cube.logs.newrelic.ignoreFields={{ .Values.configVars.logs.newrelic.ignoreFields | default "" }}
+    cube.metrics.retention={{ .Values.configVars.metrics.retention }}
+    cube.metrics.updateInterval={{ .Values.configVars.metrics.updateInterval }}
+    cube.traces.retention={{ .Values.configVars.traces.retention }}
+    cube.traces.slowQueryThreshold={{ .Values.configVars.traces.slowQueryThreshold }}
+    
+    # Tracegen Configuration
+    cube.tracegen.disable={{ .Values.configVars.tracegen.disable | default false }}
+    
+    # Service Configuration
+    cube.service.port={{ .Values.service.port }}
+    cube.service.internalPort={{ .Values.service.internalPort }}
+    cube.service.admin.enabled={{ .Values.service.admin.enabled | default false }}
+    cube.service.admin.port={{ .Values.service.admin.port | default 3199 }}
+    cube.service.admin.token=
+    
+    # Token (will be populated via secret)
+    cube.token=
+    
   {{- if .Values.configVars.alerts.configFile }}
   alerts.yml: |
     {{- toYaml .Values.configVars.alerts.configFile | nindent 4 }}
