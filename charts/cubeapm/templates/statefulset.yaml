@@ -49,6 +49,7 @@ spec:
           image: {{ template "cubeapm.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
+            - "--config-file=/etc/cubeapm/config.properties"
             - "--data-dir=/var/lib/cubeapm/data"
             {{- if .Values.configVars.alerts.configFile }}
             - "--alerts.config-file=/etc/cubeapm/alerts.yml"
@@ -115,8 +116,6 @@ spec:
             # http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
             # {{- end }}
             # {{- end }}
-            - name: CUBE_TOKEN
-              value: {{ required "A valid configVars.token is required!" .Values.configVars.token }}
             - name: CUBE_BASE_URL
               value: {{ required "A valid configVars.baseUrl is required!" .Values.configVars.baseUrl }}
             - name: CUBE_DATABASE_URL
@@ -141,14 +140,6 @@ spec:
               value: {{ .Values.configVars.logLevel }}
             - name: CUBE_SHUTDOWN_DELAY
               value: {{ .Values.configVars.shutdownDelay | quote }}
-            {{- if .Values.configVars.smtp.from }}
-            - name: CUBE_SMTP_FROM
-              value: {{ .Values.configVars.smtp.from }}
-            {{- end }}
-            {{- if .Values.configVars.smtp.url }}
-            - name: CUBE_SMTP_URL
-              value: {{ .Values.configVars.smtp.url }}
-            {{- end }}
             - name: CUBE_TIME_ZONE
               value: {{ .Values.configVars.timeZone }}
             {{- if .Values.configVars.alertmanager.charts.disable }}
@@ -341,4 +332,16 @@ spec:
         storageClassName: {{ $storageClass }}
       {{- end }}
       {{- end }}
+{{- end }}
+---
+# 🔎 Validation block
+{{- $flags := dict "hasTokenEnv" false }}
+{{- range $e := default (list) .Values.extraEnvs }}
+  {{- if eq $e.name "CUBE_TOKEN" }}
+    {{- $_ := set $flags "hasTokenEnv" true }}
+  {{- end }}
+{{- end }}
+
+{{- if not (or (index $flags "hasTokenEnv") .Values.configVars.token) }}
+  {{- fail "You must set CUBE_TOKEN via extraEnvs or set configVars.token in ConfigMap" }}
 {{- end }}
