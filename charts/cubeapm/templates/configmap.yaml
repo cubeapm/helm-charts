@@ -28,26 +28,31 @@ data:
     # Alert Manager Configuration
     alertmanager.charts.disable={{ .Values.configVars.alertmanager.charts.disable | default false }}
     alertmanager.jira.siteName={{ .Values.configVars.alertmanager.jira.siteName | default "" }}
-    alertmanager.jira.token=
+    alertmanager.jira.token={{ .Values.configVars.alertmanager.jira.token | default "" }}
     alertmanager.jira.tokenExpiryDate={{ .Values.configVars.alertmanager.jira.tokenExpiryDate | default "" }}
     alertmanager.jira.userEmail={{ .Values.configVars.alertmanager.jira.userEmail | default "" }}
     alertmanager.oauth.pagerduty.appId={{ .Values.configVars.alertmanager.oauth.pagerduty.appId | default "" }}
-    alertmanager.oauth.slack.token=
-    alertmanager.opsgenie.tokens=
+    alertmanager.oauth.slack.token={{ .Values.configVars.alertmanager.oauth.slack.token | default "" }}
+    alertmanager.opsgenie.tokens={{ .Values.configVars.alertmanager.opsgenie.tokens | default "" }}
     
     # Authentication Configuration
     auth.database.url={{ .Values.configVars.auth.database.url | default "" }}
     auth.key.session={{ .Values.configVars.auth.key.session }}
+    {{- if or .Values.configVars.auth.oidc.github.clientId .Values.configVars.auth.oidc.github.clientSecret }}
     auth.oidc.github.clientId={{ .Values.configVars.auth.oidc.github.clientId | default "" }}
-    auth.oidc.github.clientSecret=
+    auth.oidc.github.clientSecret={{ .Values.configVars.auth.oidc.github.clientSecret | default "" }}
+    {{- end }}
+    {{- if or .Values.configVars.auth.oidc.google.clientId .Values.configVars.auth.oidc.google.clientSecret }}
     auth.oidc.google.clientId={{ .Values.configVars.auth.oidc.google.clientId | default "" }}
-    auth.oidc.google.clientSecret=
-    auth.session.lifespan={{ .Values.configVars.auth.session.lifespan }}
-    auth.sysAdmins={{ .Values.configVars.auth.sysAdmins }}
+    auth.oidc.google.clientSecret={{ .Values.configVars.auth.oidc.google.clientSecret | default "" }}
+    {{- end }}
+
+    auth.session.lifespan={{ .Values.configVars.auth.session.lifespan | default 24h}}
+    auth.sysAdmins={{ .Values.configVars.auth.sysAdmins | default ""}}
     auth.defaultRole={{ .Values.configVars.auth.defaultRole }}
     
     # Cluster Configuration
-    cluster.replicationFactor={{ .Values.cluster.replicationFactor | default 1 }}
+    cluster.replicationFactor={{ .Values.cluster.replicationFactor | default 0 }}
     cluster.advertise.address={{ .Values.cluster.advertise.address | default "" }}
     cluster.advertise.allowInsecure={{ .Values.cluster.advertise.allowInsecure | default false }}
     cluster.port.distributor={{ .Values.cluster.port.distributor }}
@@ -56,19 +61,21 @@ data:
     cluster.port.state={{ .Values.cluster.port.state }}
     
     # Collector Configuration
-    collector.otlp.grpc.disable={{ .Values.collector.otlp.grpc.disable | default false }}
-    collector.otlp.grpc.port={{ .Values.collector.otlp.grpc.port | default 4317 }}
-    collector.otlp.http.disable={{ .Values.collector.otlp.http.disable | default false }}
-    collector.otlp.http.port={{ .Values.collector.otlp.http.port | default 4318 }}
+    collector.otlp.grpc-disable={{ .Values.collector.otlp.grpc.disable | default false }}
+    collector.otlp.grpc-host=0.0.0.0
+    collector.otlp.grpc-port={{ .Values.collector.otlp.grpc.port | default 4317 }}
+    collector.otlp.http-disable={{ .Values.collector.otlp.http.disable | default false }}
+    collector.otlp.http-host=0.0.0.0
+    collector.otlp.http-port={{ .Values.collector.otlp.http.port | default 4318 }}
     collector.otlp.http.cors.origins={{ .Values.collector.otlp.http.cors.origins | default "*" }}
     collector.nr8t.disable={{ .Values.collector.nr8t.disable | default false }}
-    collector.nr8t.port={{ .Values.collector.nr8t.port | default 4319 }}
+    collector.nr8t.port={{ .Values.collector.nr8t.port | default 3124 }}
     
     # Retention Configuration
-    files.retention={{ .Values.configVars.files.retention }}
-    logs.retention={{ .Values.configVars.logs.retention }}
+    files.retention={{ .Values.configVars.files.retention | default 720h}}
+    logs.retention={{ .Values.configVars.logs.retention | default 24h}}
     logs.backup.destination={{ .Values.configVars.logs.backup.destination | default "" }}
-    logs.backup.concurrency={{ .Values.configVars.logs.backup.concurrency | default 1 }}
+    logs.backup.concurrency={{ .Values.configVars.logs.backup.concurrency | default 0 }}
     logs.backup.s3.customEndpoint={{ .Values.configVars.logs.backup.s3.customEndpoint | default "" }}
     logs.backup.s3.forcePathStyle={{ .Values.configVars.logs.backup.s3.forcePathStyle | default false }}
     logs.backup.s3.storageClass={{ .Values.configVars.logs.backup.s3.storageClass | default "" }}
@@ -76,20 +83,23 @@ data:
     logs.datadog.ignoreFields={{ .Values.configVars.logs.datadog.ignoreFields | default "" }}
     logs.newrelic.streamFields={{ .Values.configVars.logs.newrelic.streamFields | default "" }}
     logs.newrelic.ignoreFields={{ .Values.configVars.logs.newrelic.ignoreFields | default "" }}
-    metrics.retention={{ .Values.configVars.metrics.retention }}
+    metrics.retention={{ .Values.configVars.metrics.retention | default 720h}}
     metrics.updateInterval={{ .Values.configVars.metrics.updateInterval }}
-    traces.retention={{ .Values.configVars.traces.retention }}
+    traces.retention={{ .Values.configVars.traces.retention | default 72h}}
     traces.slowQueryThreshold={{ .Values.configVars.traces.slowQueryThreshold }}
     
     # Tracegen Configuration
     tracegen.disable={{ .Values.configVars.tracegen.disable | default false }}
     
     # Service Configuration
-    service.port={{ .Values.service.port }}
-    service.internalPort={{ .Values.service.internalPort }}
+    http-port={{ .Values.service.port }}
+    http-port-internal={{ .Values.service.internalPort }}
     service.admin.enabled={{ .Values.service.admin.enabled | default false }}
-    service.admin.port={{ .Values.service.admin.port | default 3199 }}
-    service.admin.token={{ .Values.service.admin.token }}
+    {{- if .Values.service.admin.enabled }}
+    http-host-admin="0.0.0.0"
+    http-port-admin={{ .Values.service.admin.port | default 3199 }}
+    http-token-admin={{ .Values.service.admin.token }}
+    {{- end }}
     
     # Token (will be populated via secret)
     token={{ .Values.configVars.token }}
