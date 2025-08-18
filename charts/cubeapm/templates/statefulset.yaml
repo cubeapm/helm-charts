@@ -385,7 +385,3 @@ spec:
 # {{- if not (or $hasOpsGenieToken .Values.configVars.alertmanager.opsgenie.tokens) }}
 #   {{- fail "You must set CUBE_ALERTMANAGER_OPSGENIE_TOKENS via extraEnvs or set configVars.alertmanager.opsgenie.tokens in ConfigMap" }}
 # {{- end }}
-
-
-- name: CUBE_AUTH_KEY_SESSION
-              value: {{ required "A valid configVars.auth.key.session is required!" .Values.configVars.auth.key.session }}

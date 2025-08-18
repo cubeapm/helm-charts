@@ -47,8 +47,8 @@ data:
     auth.oidc.google.clientSecret={{ .Values.configVars.auth.oidc.google.clientSecret | default "" }}
     {{- end }}
 
-    auth.session.lifespan={{ .Values.configVars.auth.session.lifespan | default 24h}}
-    auth.sysAdmins={{ .Values.configVars.auth.sysAdmins | default ""}}
+    auth.session.lifespan={{ .Values.configVars.auth.session.lifespan | default "24h" }}
+    auth.sysAdmins={{ .Values.configVars.auth.sysAdmins | default "" }}
     auth.defaultRole={{ .Values.configVars.auth.defaultRole }}
     
     # Cluster Configuration
@@ -59,6 +59,17 @@ data:
     cluster.port.read={{ .Values.cluster.port.read }}
     cluster.port.write={{ .Values.cluster.port.write }}
     cluster.port.state={{ .Values.cluster.port.state }}
+    {{- if gt (int .Values.cluster.podCount) 1 }}
+    {{- $list := list }}
+    {{- $fullName := include "cubeapm.fullname" . }}
+    {{- range $i := until (int .Values.cluster.podCount) }}
+    {{- $list = append $list (printf "%s-%d.%s-headless" ($fullName) ($i) ($fullName | trunc 54 | trimSuffix "-")) }}
+    {{- end }}
+    cluster.peers={{ join "," $list }}
+    {{- end }}
+    {{- if .Values.collector.envTag }}
+    {{- fail "collector.envTag is deprecated. Please use configVars.envTag instead." }}
+    {{- end }}
     
     # Collector Configuration
     collector.otlp.grpc-disable={{ .Values.collector.otlp.grpc.disable | default false }}
@@ -72,8 +83,8 @@ data:
     collector.nr8t.port={{ .Values.collector.nr8t.port | default 3124 }}
     
     # Retention Configuration
-    files.retention={{ .Values.configVars.files.retention | default 720h}}
-    logs.retention={{ .Values.configVars.logs.retention | default 24h}}
+    files.retention={{ .Values.configVars.files.retention | default "720h" }}
+    logs.retention={{ .Values.configVars.logs.retention | default "24h" }}
     logs.backup.destination={{ .Values.configVars.logs.backup.destination | default "" }}
     logs.backup.concurrency={{ .Values.configVars.logs.backup.concurrency | default 0 }}
     logs.backup.s3.customEndpoint={{ .Values.configVars.logs.backup.s3.customEndpoint | default "" }}
@@ -83,9 +94,9 @@ data:
     logs.datadog.ignoreFields={{ .Values.configVars.logs.datadog.ignoreFields | default "" }}
     logs.newrelic.streamFields={{ .Values.configVars.logs.newrelic.streamFields | default "" }}
     logs.newrelic.ignoreFields={{ .Values.configVars.logs.newrelic.ignoreFields | default "" }}
-    metrics.retention={{ .Values.configVars.metrics.retention | default 720h}}
+    metrics.retention={{ .Values.configVars.metrics.retention | default "720h" }}
     metrics.updateInterval={{ .Values.configVars.metrics.updateInterval }}
-    traces.retention={{ .Values.configVars.traces.retention | default 72h}}
+    traces.retention={{ .Values.configVars.traces.retention | default "72h" }}
     traces.slowQueryThreshold={{ .Values.configVars.traces.slowQueryThreshold }}
     
     # Tracegen Configuration
