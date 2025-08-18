@@ -18,12 +18,10 @@ data:
     database.url={{ .Values.configVars.database.url }}
     
     # SMTP Configuration
-    {{- if and .Values.configVars.smtp (ne .Values.configVars.smtp.from "") }}
-    smtp.from={{ .Values.configVars.smtp.from }}
-    {{- else }}
-    # smtp.from=
+    {{- if or .Values.configVars.smtp.from .Values.configVars.smtp.url }}
+    smtp.from={{ required "A valid configVars.smtp.from is also required if configVars.smtp.url is set!" .Values.configVars.smtp.from }}
+    smtp.url={{ required "A valid configVars.smtp.url is also required if configVars.smtp.from is set!" .Values.configVars.smtp.url }}
     {{- end }}
-    # smtp.url={{ .Values.configVars.smtp.url}}
     
     # Alert Manager Configuration
     alertmanager.charts.disable={{ .Values.configVars.alertmanager.charts.disable | default false }}
