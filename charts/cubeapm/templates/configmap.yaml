@@ -8,87 +8,87 @@ data:
     # Sensitive values are left empty and can be populated via secrets
     
     # Basic Configuration
-    cube.baseUrl={{ .Values.configVars.baseUrl }}
-    cube.envTag={{ .Values.configVars.envTag | default "" }}
-    cube.logLevel={{ .Values.configVars.logLevel }}
-    cube.shutdownDelay={{ .Values.configVars.shutdownDelay }}
-    cube.timeZone={{ .Values.configVars.timeZone }}
+    baseUrl={{ .Values.configVars.baseUrl }}
+    envTag={{ .Values.configVars.envTag | default "" }}
+    logLevel={{ .Values.configVars.logLevel }}
+    shutdownDelay={{ .Values.configVars.shutdownDelay }}
+    timeZone={{ .Values.configVars.timeZone }}
     
     # Database Configuration
-    cube.database.url={{ .Values.configVars.database.url }}
+    database.url={{ .Values.configVars.database.url }}
     
     # SMTP Configuration
-    cube.smtp.from={{ .Values.configVars.smtp.from | default "" }}
-    cube.smtp.url={{ .Values.configVars.smtp.url | default "" }}
+    smtp.from={{ .Values.configVars.smtp.from | default "" }}
+    smtp.url={{ .Values.configVars.smtp.url | default "" }}
     
     # Alert Manager Configuration
-    cube.alertmanager.charts.disable={{ .Values.configVars.alertmanager.charts.disable | default false }}
-    cube.alertmanager.jira.siteName={{ .Values.configVars.alertmanager.jira.siteName | default "" }}
-    cube.alertmanager.jira.token=
-    cube.alertmanager.jira.tokenExpiryDate={{ .Values.configVars.alertmanager.jira.tokenExpiryDate | default "" }}
-    cube.alertmanager.jira.userEmail={{ .Values.configVars.alertmanager.jira.userEmail | default "" }}
-    cube.alertmanager.oauth.pagerduty.appId={{ .Values.configVars.alertmanager.oauth.pagerduty.appId | default "" }}
-    cube.alertmanager.oauth.slack.token=
-    cube.alertmanager.opsgenie.tokens=
+    alertmanager.charts.disable={{ .Values.configVars.alertmanager.charts.disable | default false }}
+    alertmanager.jira.siteName={{ .Values.configVars.alertmanager.jira.siteName | default "" }}
+    alertmanager.jira.token=
+    alertmanager.jira.tokenExpiryDate={{ .Values.configVars.alertmanager.jira.tokenExpiryDate | default "" }}
+    alertmanager.jira.userEmail={{ .Values.configVars.alertmanager.jira.userEmail | default "" }}
+    alertmanager.oauth.pagerduty.appId={{ .Values.configVars.alertmanager.oauth.pagerduty.appId | default "" }}
+    alertmanager.oauth.slack.token=
+    alertmanager.opsgenie.tokens=
     
     # Authentication Configuration
-    cube.auth.database.url={{ .Values.configVars.auth.database.url | default "" }}
-    cube.auth.key.session=
-    cube.auth.oidc.github.clientId={{ .Values.configVars.auth.oidc.github.clientId | default "" }}
-    cube.auth.oidc.github.clientSecret=
-    cube.auth.oidc.google.clientId={{ .Values.configVars.auth.oidc.google.clientId | default "" }}
-    cube.auth.oidc.google.clientSecret=
-    cube.auth.session.lifespan={{ .Values.configVars.auth.session.lifespan }}
-    cube.auth.sysAdmins={{ .Values.configVars.auth.sysAdmins }}
-    cube.auth.defaultRole={{ .Values.configVars.auth.defaultRole }}
+    auth.database.url={{ .Values.configVars.auth.database.url | default "" }}
+    auth.key.session=
+    auth.oidc.github.clientId={{ .Values.configVars.auth.oidc.github.clientId | default "" }}
+    auth.oidc.github.clientSecret=
+    auth.oidc.google.clientId={{ .Values.configVars.auth.oidc.google.clientId | default "" }}
+    auth.oidc.google.clientSecret=
+    auth.session.lifespan={{ .Values.configVars.auth.session.lifespan }}
+    auth.sysAdmins={{ .Values.configVars.auth.sysAdmins }}
+    auth.defaultRole={{ .Values.configVars.auth.defaultRole }}
     
     # Cluster Configuration
-    cube.cluster.replicationFactor={{ .Values.cluster.replicationFactor | default 1 }}
-    cube.cluster.advertise.address={{ .Values.cluster.advertise.address | default "" }}
-    cube.cluster.advertise.allowInsecure={{ .Values.cluster.advertise.allowInsecure | default false }}
-    cube.cluster.port.distributor={{ .Values.cluster.port.distributor }}
-    cube.cluster.port.read={{ .Values.cluster.port.read }}
-    cube.cluster.port.write={{ .Values.cluster.port.write }}
-    cube.cluster.port.state={{ .Values.cluster.port.state }}
+    cluster.replicationFactor={{ .Values.cluster.replicationFactor | default 1 }}
+    cluster.advertise.address={{ .Values.cluster.advertise.address | default "" }}
+    cluster.advertise.allowInsecure={{ .Values.cluster.advertise.allowInsecure | default false }}
+    cluster.port.distributor={{ .Values.cluster.port.distributor }}
+    cluster.port.read={{ .Values.cluster.port.read }}
+    cluster.port.write={{ .Values.cluster.port.write }}
+    cluster.port.state={{ .Values.cluster.port.state }}
     
     # Collector Configuration
-    cube.collector.otlp.grpc.disable={{ .Values.collector.otlp.grpc.disable | default false }}
-    cube.collector.otlp.grpc.port={{ .Values.collector.otlp.grpc.port | default 4317 }}
-    cube.collector.otlp.http.disable={{ .Values.collector.otlp.http.disable | default false }}
-    cube.collector.otlp.http.port={{ .Values.collector.otlp.http.port | default 4318 }}
-    cube.collector.otlp.http.cors.origins={{ .Values.collector.otlp.http.cors.origins | default "*" }}
-    cube.collector.nr8t.disable={{ .Values.collector.nr8t.disable | default false }}
-    cube.collector.nr8t.port={{ .Values.collector.nr8t.port | default 4319 }}
+    collector.otlp.grpc.disable={{ .Values.collector.otlp.grpc.disable | default false }}
+    collector.otlp.grpc.port={{ .Values.collector.otlp.grpc.port | default 4317 }}
+    collector.otlp.http.disable={{ .Values.collector.otlp.http.disable | default false }}
+    collector.otlp.http.port={{ .Values.collector.otlp.http.port | default 4318 }}
+    collector.otlp.http.cors.origins={{ .Values.collector.otlp.http.cors.origins | default "*" }}
+    collector.nr8t.disable={{ .Values.collector.nr8t.disable | default false }}
+    collector.nr8t.port={{ .Values.collector.nr8t.port | default 4319 }}
     
     # Retention Configuration
-    cube.files.retention={{ .Values.configVars.files.retention }}
-    cube.logs.retention={{ .Values.configVars.logs.retention }}
-    cube.logs.backup.destination={{ .Values.configVars.logs.backup.destination | default "" }}
-    cube.logs.backup.concurrency={{ .Values.configVars.logs.backup.concurrency | default 1 }}
-    cube.logs.backup.s3.customEndpoint={{ .Values.configVars.logs.backup.s3.customEndpoint | default "" }}
-    cube.logs.backup.s3.forcePathStyle={{ .Values.configVars.logs.backup.s3.forcePathStyle | default false }}
-    cube.logs.backup.s3.storageClass={{ .Values.configVars.logs.backup.s3.storageClass | default "" }}
-    cube.logs.datadog.streamFields={{ .Values.configVars.logs.datadog.streamFields | default "" }}
-    cube.logs.datadog.ignoreFields={{ .Values.configVars.logs.datadog.ignoreFields | default "" }}
-    cube.logs.newrelic.streamFields={{ .Values.configVars.logs.newrelic.streamFields | default "" }}
-    cube.logs.newrelic.ignoreFields={{ .Values.configVars.logs.newrelic.ignoreFields | default "" }}
-    cube.metrics.retention={{ .Values.configVars.metrics.retention }}
-    cube.metrics.updateInterval={{ .Values.configVars.metrics.updateInterval }}
-    cube.traces.retention={{ .Values.configVars.traces.retention }}
-    cube.traces.slowQueryThreshold={{ .Values.configVars.traces.slowQueryThreshold }}
+    files.retention={{ .Values.configVars.files.retention }}
+    logs.retention={{ .Values.configVars.logs.retention }}
+    logs.backup.destination={{ .Values.configVars.logs.backup.destination | default "" }}
+    logs.backup.concurrency={{ .Values.configVars.logs.backup.concurrency | default 1 }}
+    logs.backup.s3.customEndpoint={{ .Values.configVars.logs.backup.s3.customEndpoint | default "" }}
+    logs.backup.s3.forcePathStyle={{ .Values.configVars.logs.backup.s3.forcePathStyle | default false }}
+    logs.backup.s3.storageClass={{ .Values.configVars.logs.backup.s3.storageClass | default "" }}
+    logs.datadog.streamFields={{ .Values.configVars.logs.datadog.streamFields | default "" }}
+    logs.datadog.ignoreFields={{ .Values.configVars.logs.datadog.ignoreFields | default "" }}
+    logs.newrelic.streamFields={{ .Values.configVars.logs.newrelic.streamFields | default "" }}
+    logs.newrelic.ignoreFields={{ .Values.configVars.logs.newrelic.ignoreFields | default "" }}
+    metrics.retention={{ .Values.configVars.metrics.retention }}
+    metrics.updateInterval={{ .Values.configVars.metrics.updateInterval }}
+    traces.retention={{ .Values.configVars.traces.retention }}
+    traces.slowQueryThreshold={{ .Values.configVars.traces.slowQueryThreshold }}
     
     # Tracegen Configuration
-    cube.tracegen.disable={{ .Values.configVars.tracegen.disable | default false }}
+    tracegen.disable={{ .Values.configVars.tracegen.disable | default false }}
     
     # Service Configuration
-    cube.service.port={{ .Values.service.port }}
-    cube.service.internalPort={{ .Values.service.internalPort }}
-    cube.service.admin.enabled={{ .Values.service.admin.enabled | default false }}
-    cube.service.admin.port={{ .Values.service.admin.port | default 3199 }}
-    cube.service.admin.token=
+    service.port={{ .Values.service.port }}
+    service.internalPort={{ .Values.service.internalPort }}
+    service.admin.enabled={{ .Values.service.admin.enabled | default false }}
+    service.admin.port={{ .Values.service.admin.port | default 3199 }}
+    service.admin.token=
     
     # Token (will be populated via secret)
-    cube.token=
+    token={{ .Values.configVars.token }}
     
   {{- if .Values.configVars.alerts.configFile }}
   alerts.yml: |
