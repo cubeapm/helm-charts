@@ -39,12 +39,12 @@ data:
     auth.database.url={{ .Values.configVars.auth.database.url | default "" }}
     auth.key.session={{ .Values.configVars.auth.key.session }}
     {{- if or .Values.configVars.auth.oidc.github.clientId .Values.configVars.auth.oidc.github.clientSecret }}
-    auth.oidc.github.clientId={{ .Values.configVars.auth.oidc.github.clientId | default "" }}
-    auth.oidc.github.clientSecret={{ .Values.configVars.auth.oidc.github.clientSecret | default "" }}
+    auth.oidc.github.clientId={{ required "A valid configVars.auth.oidc.github.clientId is also required if configVars.auth.oidc.github.clientSecret is set!" .Values.configVars.auth.oidc.github.clientId }}
+    auth.oidc.github.clientSecret={{ required "A valid configVars.auth.oidc.github.clientSecret is also required if configVars.auth.oidc.github.clientId is set!" .Values.configVars.auth.oidc.github.clientSecret }}
     {{- end }}
     {{- if or .Values.configVars.auth.oidc.google.clientId .Values.configVars.auth.oidc.google.clientSecret }}
-    auth.oidc.google.clientId={{ .Values.configVars.auth.oidc.google.clientId | default "" }}
-    auth.oidc.google.clientSecret={{ .Values.configVars.auth.oidc.google.clientSecret | default "" }}
+    auth.oidc.google.clientId={{ required "A valid configVars.auth.oidc.google.clientId is also required if configVars.auth.oidc.google.clientSecret is set!" .Values.configVars.auth.oidc.google.clientId }}
+    auth.oidc.google.clientSecret={{ required "A valid configVars.auth.oidc.google.clientSecret is also required if configVars.auth.oidc.google.clientId is set!" .Values.configVars.auth.oidc.google.clientSecret }}
     {{- end }}
 
     auth.session.lifespan={{ .Values.configVars.auth.session.lifespan | default "24h" }}
@@ -72,24 +72,37 @@ data:
     {{- end }}
     
     # Collector Configuration
-    collector.otlp.grpc-disable={{ .Values.collector.otlp.grpc.disable | default false }}
+    {{- if .Values.collector.otlp.grpc.disable }}
+    collector.otlp.grpc-disable=true
+    {{- else }}
     collector.otlp.grpc-host=0.0.0.0
     collector.otlp.grpc-port={{ .Values.collector.otlp.grpc.port | default 4317 }}
-    collector.otlp.http-disable={{ .Values.collector.otlp.http.disable | default false }}
+    {{- end }}
+    {{- if .Values.collector.otlp.http.disable }}
+    collector.otlp.http-disable=true
+    {{- else }}
     collector.otlp.http-host=0.0.0.0
     collector.otlp.http-port={{ .Values.collector.otlp.http.port | default 4318 }}
     collector.otlp.http.cors.origins={{ .Values.collector.otlp.http.cors.origins | default "*" }}
-    collector.nr8t.disable={{ .Values.collector.nr8t.disable | default false }}
+    {{- end }}
+    {{- if .Values.collector.nr8t.disable }}
+    collector.nr8t.disable=true
+    {{- else }}
     collector.nr8t.port={{ .Values.collector.nr8t.port | default 3124 }}
+    {{- end }}
     
     # Retention Configuration
     files.retention={{ .Values.configVars.files.retention | default "720h" }}
     logs.retention={{ .Values.configVars.logs.retention | default "24h" }}
-    logs.backup.destination={{ .Values.configVars.logs.backup.destination | default "" }}
+    {{- if .Values.configVars.logs.backup.destination }}
+    logs.backup.destination={{ .Values.configVars.logs.backup.destination }}
     logs.backup.concurrency={{ .Values.configVars.logs.backup.concurrency | default 0 }}
     logs.backup.s3.customEndpoint={{ .Values.configVars.logs.backup.s3.customEndpoint | default "" }}
-    logs.backup.s3.forcePathStyle={{ .Values.configVars.logs.backup.s3.forcePathStyle | default false }}
+    {{- if .Values.configVars.logs.backup.s3.forcePathStyle }}
+    logs.backup.s3.forcePathStyle=true
+    {{- end }}
     logs.backup.s3.storageClass={{ .Values.configVars.logs.backup.s3.storageClass | default "" }}
+    {{- end }}
     logs.datadog.streamFields={{ .Values.configVars.logs.datadog.streamFields | default "" }}
     logs.datadog.ignoreFields={{ .Values.configVars.logs.datadog.ignoreFields | default "" }}
     logs.newrelic.streamFields={{ .Values.configVars.logs.newrelic.streamFields | default "" }}
