@@ -336,12 +336,20 @@ spec:
 ---
 # 🔎 Validation block
 {{- $flags := dict "hasTokenEnv" false }}
+{{- $flags := dict "hasJiraToken" false }}
 {{- range $e := default (list) .Values.extraEnvs }}
   {{- if eq $e.name "CUBE_TOKEN" }}
     {{- $_ := set $flags "hasTokenEnv" true }}
+  {{- end }}
+  {{- if eq $e.name "CUBE_ALERTMANAGER_JIRA_TOKEN" }}
+    {{- $_ := set $flags "hasJiraToken" true }}
   {{- end }}
 {{- end }}
 
 {{- if not (or (index $flags "hasTokenEnv") .Values.configVars.token) }}
   {{- fail "You must set CUBE_TOKEN via extraEnvs or set configVars.token in ConfigMap" }}
+{{- end }}
+
+{{- if not (or (index $flags "hasJiraToken") .Values.configVars.alertmanager.jira.token) }}
+  {{- fail "You must set CUBE_TOKEN via extraEnvs or set configVars.alertmanager.jira.token in ConfigMap" }}
 {{- end }}
