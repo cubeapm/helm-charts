@@ -115,38 +115,72 @@ spec:
             # These environment variables contain the keys to look up in the secret map
             # The application will check these first, then fall back to config.properties
             
-            # Core Token (required)
+            # Core Token (required) - Conditional logic for secret vs values.yaml
+            {{- if .Values.configVars.useSecrets }}
+            - name: CUBE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cubeapm.fullname" . }}-secrets
+                  key: {{ .Values.configVars.secretKeys.token | default "cube-token" }}
+            {{- else }}
+            - name: CUBE_TOKEN
+              value: {{ required "A valid configVars.token is required!" .Values.configVars.token }}
+            {{- end }}
+            
+            # Authentication Session Key - Conditional logic for secret vs values.yaml
+            {{- if .Values.configVars.useSecrets }}
+            - name: CUBE_AUTH_KEY_SESSION
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cubeapm.fullname" . }}-secrets
+                  key: {{ .Values.configVars.secretKeys.authSession | default "cube-auth-session-key" }}
+            {{- else }}
+            - name: CUBE_AUTH_KEY_SESSION
+              value: {{ required "A valid configVars.auth.key.session is required!" .Values.configVars.auth.key.session }}
+            {{- end }}
+            
+            # Secret Reference Keys (for application logic)
             - name: CUBE_SECRET_TOKEN
-              value: "cube-token"
+              value: {{ .Values.configVars.secretKeys.token | default "cube-token" }}
             
             # Authentication Secrets
             - name: CUBE_SECRET_AUTH_SESSION_KEY
-              value: "cube-auth-session-key"
+              value: {{ .Values.configVars.secretKeys.authSession | default "cube-auth-session-key" }}
             
             # OIDC GitHub Secrets (if enabled)
             {{- if or .Values.configVars.auth.oidc.github.clientId .Values.configVars.auth.oidc.github.clientSecret }}
             - name: CUBE_SECRET_GITHUB_CLIENT_SECRET
-              value: "cube-github-client-secret"
+              value: {{ .Values.configVars.secretKeys.githubClientSecret | default "cube-github-client-secret" }}
             {{- end }}
             
             # OIDC Google Secrets (if enabled)
             {{- if or .Values.configVars.auth.oidc.google.clientId .Values.configVars.auth.oidc.google.clientSecret }}
             - name: CUBE_SECRET_GOOGLE_CLIENT_SECRET
-              value: "cube-google-client-secret"
+              value: {{ .Values.configVars.secretKeys.googleClientSecret | default "cube-google-client-secret" }}
             {{- end }}
             
             # Alert Manager Secrets
             - name: CUBE_SECRET_JIRA_TOKEN
-              value: "cube-jira-token"
+              value: {{ .Values.configVars.secretKeys.jiraToken | default "cube-jira-token" }}
             - name: CUBE_SECRET_SLACK_TOKEN
-              value: "cube-slack-token"
+              value: {{ .Values.configVars.secretKeys.slackToken | default "cube-slack-token" }}
             - name: CUBE_SECRET_OPSGENIE_TOKENS
-              value: "cube-opsgenie-tokens"
+              value: {{ .Values.configVars.secretKeys.opsgenieTokens | default "cube-opsgenie-tokens" }}
             
-            # Admin Token (if admin service is enabled)
+            # Admin Token (if admin service is enabled) - Conditional logic
             {{- if .Values.service.admin.enabled }}
+            {{- if .Values.configVars.useSecrets }}
+            - name: CUBE_HTTP_TOKEN_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cubeapm.fullname" . }}-secrets
+                  key: {{ .Values.configVars.secretKeys.adminToken | default "cube-admin-token" }}
+            {{- else }}
+            - name: CUBE_HTTP_TOKEN_ADMIN
+              value: {{ .Values.service.admin.token | quote }}
+            {{- end }}
             - name: CUBE_SECRET_ADMIN_TOKEN
-              value: "cube-admin-token"
+              value: {{ .Values.configVars.secretKeys.adminToken | default "cube-admin-token" }}
             {{- end }}
             
             # Cluster peers (for multi-pod deployments)
