@@ -4,58 +4,124 @@ metadata:
   name: {{ include "cubeapm.fullname" . }}
 data:
   config.properties: |
-    # CubeAPM Configuration Properties
-    # Sensitive values are left empty and can be populated via secrets
     
-    baseUrl={{ .Values.configVars.baseUrl }}
-    envTag={{ .Values.configVars.envTag | default "" }}
-    logLevel={{ .Values.configVars.logLevel }}
-    shutdownDelay={{ .Values.configVars.shutdownDelay }}
-    timeZone={{ .Values.configVars.timeZone }}
-    
-    database.url={{ .Values.configVars.database.url }}
-    
-    {{- if or .Values.configVars.smtp.from .Values.configVars.smtp.url }}
-    smtp.from={{ required "A valid configVars.smtp.from is also required if configVars.smtp.url is set!" .Values.configVars.smtp.from }}
-    smtp.url={{ required "A valid configVars.smtp.url is also required if configVars.smtp.from is set!" .Values.configVars.smtp.url }}
-    {{- end }}
-    
-    alertmanager.charts.disable={{ .Values.configVars.alertmanager.charts.disable | default false }}
-    alertmanager.jira.siteName={{ .Values.configVars.alertmanager.jira.siteName | default "" }}
-    alertmanager.jira.token={{ .Values.configVars.alertmanager.jira.token | default "" }}
-    alertmanager.jira.tokenExpiryDate={{ .Values.configVars.alertmanager.jira.tokenExpiryDate | default "" }}
-    alertmanager.jira.userEmail={{ .Values.configVars.alertmanager.jira.userEmail | default "" }}
-    alertmanager.oauth.pagerduty.appId={{ .Values.configVars.alertmanager.oauth.pagerduty.appId | default "" }}
-    alertmanager.oauth.slack.token={{ .Values.configVars.alertmanager.oauth.slack.token | default "" }}
-    alertmanager.opsgenie.tokens={{ .Values.configVars.alertmanager.opsgenie.tokens | default "" }}
-    
-    # Authentication Configuration
-    auth.database.url={{ .Values.configVars.auth.database.url | default "" }}
+    token={{ .Values.configVars.token }}
+
     auth.key.session={{ .Values.configVars.auth.key.session }}
+
+    base-url={{ .Values.configVars.baseUrl }}
+    auth.sys-admins={{ .Values.configVars.auth.sysAdmins }}
+    time-zone={{ .Values.configVars.timeZone }}
+
+    database.url={{ .Values.configVars.database.url }}
+    auth.database.url={{ .Values.configVars.auth.database.url }}
+
     {{- if .Values.configVars.auth.oidc.github.clientId }}
-    auth.oidc.github.clientId={{ .Values.configVars.auth.oidc.github.clientId }}
+    auth.oidc.github.client-id={{ .Values.configVars.auth.oidc.github.clientId }}
     {{- end }}
     {{- if .Values.configVars.auth.oidc.github.clientSecret }}
-    auth.oidc.github.clientSecret={{ .Values.configVars.auth.oidc.github.clientSecret }}
+    auth.oidc.github.client-secret={{ .Values.configVars.auth.oidc.github.clientSecret }}
     {{- end }}
     {{- if .Values.configVars.auth.oidc.google.clientId }}
-    auth.oidc.google.clientId={{ .Values.configVars.auth.oidc.google.clientId }}
+    auth.oidc.google.client-id={{ .Values.configVars.auth.oidc.google.clientId }}
     {{- end }}
     {{- if .Values.configVars.auth.oidc.google.clientSecret }}
-    auth.oidc.google.clientSecret={{ .Values.configVars.auth.oidc.google.clientSecret }}
+    auth.oidc.google.client-secret={{ .Values.configVars.auth.oidc.google.clientSecret }}
     {{- end }}
 
-    auth.session.lifespan={{ .Values.configVars.auth.session.lifespan | default "24h" }}
-    auth.sysAdmins={{ .Values.configVars.auth.sysAdmins | default "" }}
-    auth.defaultRole={{ .Values.configVars.auth.defaultRole }}
+    alertmanager.oauth.pagerduty.app-id={{ .Values.configVars.alertmanager.oauth.pagerduty.appId }}
+    alertmanager.oauth.slack.token={{ .Values.configVars.alertmanager.oauth.slack.token }}
+    alertmanager.jira.site-name={{ .Values.configVars.alertmanager.jira.siteName }}
+    alertmanager.jira.token={{ .Values.configVars.alertmanager.jira.token }}
+    alertmanager.jira.token-expiry-date={{ .Values.configVars.alertmanager.jira.tokenExpiryDate }}
+    alertmanager.jira.user-email={{ .Values.configVars.alertmanager.jira.userEmail }}
+    alertmanager.opsgenie.tokens={{ .Values.configVars.alertmanager.opsgenie.tokens }}
+
+    {{- if or .Values.configVars.smtp.from .Values.configVars.smtp.url }}
+    smtp.url={{ required "A valid configVars.smtp.url is also required if configVars.smtp.from is set!" .Values.configVars.smtp.url }}
+    smtp.from={{ required "A valid configVars.smtp.from is also required if configVars.smtp.url is set!" .Values.configVars.smtp.from }}
+    {{- end }}
+
+    tracegen.disable={{ .Values.configVars.tracegen.disable }}
     
-    cluster.replicationFactor={{ .Values.cluster.replicationFactor | default 0 }}
-    cluster.advertise.address={{ .Values.cluster.advertise.address | default "" }}
-    cluster.advertise.allowInsecure={{ .Values.cluster.advertise.allowInsecure | default false }}
+    # logs.backup.creds-file-path
+    # logs.backup.s3.config-file-path
+    # logs.backup.s3.config-profile
+    {{- if .Values.configVars.logs.backup.destination }}
+    logs.backup.destination={{ .Values.configVars.logs.backup.destination }}
+    logs.backup.s3.custom-endpoint={{ .Values.configVars.logs.backup.s3.customEndpoint }}
+    logs.backup.concurrency={{ .Values.configVars.logs.backup.concurrency }}
+    {{- if .Values.configVars.logs.backup.s3.forcePathStyle }}
+    logs.backup.s3.force-path-style=true
+    {{- end }}
+    logs.backup.s3.storage-class={{ .Values.configVars.logs.backup.s3.storageClass }}
+    {{- end }}
+
+    log-level={{ .Values.configVars.logLevel }}
+
+    logs.retention={{ .Values.configVars.logs.retention }}
+    metrics.retention={{ .Values.configVars.metrics.retention }}
+    traces.retention={{ .Values.configVars.traces.retention }}
+    files.retention={{ .Values.configVars.files.retention }}
+
+    traces.slow-query-threshold={{ .Values.configVars.traces.slowQueryThreshold }}
+
+    logs.datadog.stream-fields={{ .Values.configVars.logs.datadog.streamFields }}
+    logs.datadog.ignore-fields={{ .Values.configVars.logs.datadog.ignoreFields }}
+    logs.newrelic.stream-fields={{ .Values.configVars.logs.newrelic.streamFields }}
+    logs.newrelic.ignore-fields={{ .Values.configVars.logs.newrelic.ignoreFields }}
+
+    http-host=0.0.0.0
+    http-port={{ .Values.service.port }}
+    http-port-internal={{ .Values.service.internalPort }}
+
     cluster.port.distributor={{ .Values.cluster.port.distributor }}
     cluster.port.read={{ .Values.cluster.port.read }}
-    cluster.port.write={{ .Values.cluster.port.write }}
     cluster.port.state={{ .Values.cluster.port.state }}
+    cluster.port.write={{ .Values.cluster.port.write }}
+
+    {{- if .Values.collector.nr8t.disable }}
+    collector.nr.8t-disable=true
+    {{- else }}
+    collector.nr.8t-host=0.0.0.0
+    collector.nr.8t-port={{ .Values.collector.nr8t.port }}
+    {{- end }}
+
+    {{- if .Values.collector.otlp.grpc.disable }}
+    collector.otlp.grpc-disable=true
+    {{- else }}
+    collector.otlp.grpc-host=0.0.0.0
+    collector.otlp.grpc-port={{ .Values.collector.otlp.grpc.port }}
+    {{- end }}
+
+    {{- if .Values.collector.otlp.http.disable }}
+    collector.otlp.http-disable=true
+    {{- else }}
+    collector.otlp.http.cors.origins={{ .Values.collector.otlp.http.cors.origins }}
+    {{- end }}
+    collector.otlp.http-host=0.0.0.0
+    collector.otlp.http-port={{ .Values.collector.otlp.http.port }}
+
+    alertmanager.charts.disable={{ .Values.configVars.alertmanager.charts.disable }}
+
+    env-tag={{ .Values.configVars.envTag }}
+    auth.default-role={{ .Values.configVars.auth.defaultRole }}
+    auth.method.email.disable=false
+    auth.method.webauthn.enable=false
+    auth.mfa.enforce=false
+    auth.selfservice.signup.disable=false
+
+    auth.session.lifespan={{ .Values.configVars.auth.session.lifespan }}
+
+    cluster.advertise-address={{ .Values.cluster.advertise.address }}
+    cluster.allow-insecure-advertise={{ .Values.cluster.advertise.allowInsecure }}
+    cluster.replication-factor={{ .Values.cluster.replicationFactor }}
+
+    collector.nr.cors.headers=Content-Type
+    collector.nr.cors.origins=*
+
+    shutdown-delay={{ .Values.configVars.shutdownDelay }}
+    
     {{- if gt (int .Values.cluster.podCount) 1 }}
     {{- $list := list }}
     {{- $fullName := include "cubeapm.fullname" . }}
@@ -68,57 +134,13 @@ data:
     {{- fail "collector.envTag is deprecated. Please use configVars.envTag instead." }}
     {{- end }}
     
-    {{- if .Values.collector.otlp.grpc.disable }}
-    collector.otlp.grpc-disable=true
-    {{- else }}
-    collector.otlp.grpc-host=0.0.0.0
-    collector.otlp.grpc-port={{ .Values.collector.otlp.grpc.port | default 4317 }}
-    {{- end }}
-    {{- if .Values.collector.otlp.http.disable }}
-    collector.otlp.http-disable=true
-    {{- else }}
-    collector.otlp.http-host=0.0.0.0
-    collector.otlp.http-port={{ .Values.collector.otlp.http.port | default 4318 }}
-    collector.otlp.http.cors.origins={{ .Values.collector.otlp.http.cors.origins | default "*" }}
-    {{- end }}
-    {{- if .Values.collector.nr8t.disable }}
-    collector.nr8t.disable=true
-    {{- else }}
-    collector.nr8t.port={{ .Values.collector.nr8t.port | default 3124 }}
-    {{- end }}
+    metrics.update-interval={{ .Values.configVars.metrics.updateInterval }}
     
-    files.retention={{ .Values.configVars.files.retention | default "720h" }}
-    logs.retention={{ .Values.configVars.logs.retention | default "24h" }}
-    {{- if .Values.configVars.logs.backup.destination }}
-    logs.backup.destination={{ .Values.configVars.logs.backup.destination }}
-    logs.backup.concurrency={{ .Values.configVars.logs.backup.concurrency | default 0 }}
-    logs.backup.s3.customEndpoint={{ .Values.configVars.logs.backup.s3.customEndpoint | default "" }}
-    {{- if .Values.configVars.logs.backup.s3.forcePathStyle }}
-    logs.backup.s3.forcePathStyle=true
-    {{- end }}
-    logs.backup.s3.storageClass={{ .Values.configVars.logs.backup.s3.storageClass | default "" }}
-    {{- end }}
-    logs.datadog.streamFields={{ .Values.configVars.logs.datadog.streamFields | default "" }}
-    logs.datadog.ignoreFields={{ .Values.configVars.logs.datadog.ignoreFields | default "" }}
-    logs.newrelic.streamFields={{ .Values.configVars.logs.newrelic.streamFields | default "" }}
-    logs.newrelic.ignoreFields={{ .Values.configVars.logs.newrelic.ignoreFields | default "" }}
-    metrics.retention={{ .Values.configVars.metrics.retention | default "720h" }}
-    metrics.updateInterval={{ .Values.configVars.metrics.updateInterval }}
-    traces.retention={{ .Values.configVars.traces.retention | default "72h" }}
-    traces.slowQueryThreshold={{ .Values.configVars.traces.slowQueryThreshold }}
-    
-    tracegen.disable={{ .Values.configVars.tracegen.disable | default false }}
-    
-    http-port={{ .Values.service.port }}
-    http-port-internal={{ .Values.service.internalPort }}
-    service.admin.enabled={{ .Values.service.admin.enabled | default false }}
     {{- if .Values.service.admin.enabled }}
     http-host-admin="0.0.0.0"
-    http-port-admin={{ .Values.service.admin.port | default 3199 }}
+    http-port-admin={{ .Values.service.admin.port }}
     http-token-admin={{ .Values.service.admin.token }}
     {{- end }}
-    
-    token={{ .Values.configVars.token }}
     
   {{- if .Values.configVars.alerts.configFile }}
   alerts.yml: |
