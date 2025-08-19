@@ -8,3 +8,5 @@ charts:
   - charts/cubeapm
 chart-repos:
   - cubeapm=https://charts.cubeapm.com
+ci-values-files:
+  - charts/cubeapm/ci/test-values.yaml

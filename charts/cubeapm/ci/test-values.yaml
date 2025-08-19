@@ -1,0 +1,34 @@
+# Test values for CI/CD
+# These are minimal values required to pass validation
+
+configVars:
+  token: "test-token-for-ci"
+  auth:
+    key:
+      session: "test-session-key-for-ci"
+  baseUrl: "http://localhost:8080"
+  database:
+    url: "sqlite:///test.db"
+  alertmanager:
+    jira:
+      token: "test-jira-token"
+    oauth:
+      pagerduty:
+        appId: "test-pagerduty-app-id"
+      slack:
+        token: "test-slack-token"
+    opsgenie:
+      tokens: "test-opsgenie-token"
+
+# Disable persistence for testing
+persistence:
+  enabled: false
+
+# Minimal resources for testing
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"
