@@ -4,9 +4,10 @@ metadata:
   name: {{ include "cubeapm.fullname" . }}
 data:
   config.properties: |
-    
-    token={{ .Values.configVars.token }}
 
+    # https://docs.cubeapm.com/configure
+  
+    token={{ .Values.configVars.token }}
     auth.key.session={{ .Values.configVars.auth.key.session }}
 
     base-url={{ .Values.configVars.baseUrl }}
@@ -130,6 +131,7 @@ data:
     {{- end }}
     cluster.peers={{ join "," $list }}
     {{- end }}
+
     {{- if .Values.collector.envTag }}
     {{- fail "collector.envTag is deprecated. Please use configVars.envTag instead." }}
     {{- end }}
