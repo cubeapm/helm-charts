@@ -2,7 +2,7 @@ configVars:
   token: "test-token-for-ci"
   auth:
     key:
-      session: "test-session-key-for-ci"
+      session: "c0cb9f28e4e24a9a82251c1d8f246d1f"
   baseUrl: "http://localhost:8080"
   database:
     url: "sqlite:///test.db?_fk=true"
