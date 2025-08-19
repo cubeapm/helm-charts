@@ -7,23 +7,19 @@ data:
     # CubeAPM Configuration Properties
     # Sensitive values are left empty and can be populated via secrets
     
-    # Basic Configuration
     baseUrl={{ .Values.configVars.baseUrl }}
     envTag={{ .Values.configVars.envTag | default "" }}
     logLevel={{ .Values.configVars.logLevel }}
     shutdownDelay={{ .Values.configVars.shutdownDelay }}
     timeZone={{ .Values.configVars.timeZone }}
     
-    # Database Configuration
     database.url={{ .Values.configVars.database.url }}
     
-    # SMTP Configuration
     {{- if or .Values.configVars.smtp.from .Values.configVars.smtp.url }}
     smtp.from={{ required "A valid configVars.smtp.from is also required if configVars.smtp.url is set!" .Values.configVars.smtp.from }}
     smtp.url={{ required "A valid configVars.smtp.url is also required if configVars.smtp.from is set!" .Values.configVars.smtp.url }}
     {{- end }}
     
-    # Alert Manager Configuration
     alertmanager.charts.disable={{ .Values.configVars.alertmanager.charts.disable | default false }}
     alertmanager.jira.siteName={{ .Values.configVars.alertmanager.jira.siteName | default "" }}
     alertmanager.jira.token={{ .Values.configVars.alertmanager.jira.token | default "" }}
@@ -36,20 +32,23 @@ data:
     # Authentication Configuration
     auth.database.url={{ .Values.configVars.auth.database.url | default "" }}
     auth.key.session={{ .Values.configVars.auth.key.session }}
-    {{- if or .Values.configVars.auth.oidc.github.clientId .Values.configVars.auth.oidc.github.clientSecret }}
-    auth.oidc.github.clientId={{ required "A valid configVars.auth.oidc.github.clientId is also required if configVars.auth.oidc.github.clientSecret is set!" .Values.configVars.auth.oidc.github.clientId }}
-    auth.oidc.github.clientSecret={{ required "A valid configVars.auth.oidc.github.clientSecret is also required if configVars.auth.oidc.github.clientId is set!" .Values.configVars.auth.oidc.github.clientSecret }}
+    {{- if .Values.configVars.auth.oidc.github.clientId }}
+    auth.oidc.github.clientId={{ .Values.configVars.auth.oidc.github.clientId }}
     {{- end }}
-    {{- if or .Values.configVars.auth.oidc.google.clientId .Values.configVars.auth.oidc.google.clientSecret }}
-    auth.oidc.google.clientId={{ required "A valid configVars.auth.oidc.google.clientId is also required if configVars.auth.oidc.google.clientSecret is set!" .Values.configVars.auth.oidc.google.clientId }}
-    auth.oidc.google.clientSecret={{ required "A valid configVars.auth.oidc.google.clientSecret is also required if configVars.auth.oidc.google.clientId is set!" .Values.configVars.auth.oidc.google.clientSecret }}
+    {{- if .Values.configVars.auth.oidc.github.clientSecret }}
+    auth.oidc.github.clientSecret={{ .Values.configVars.auth.oidc.github.clientSecret }}
+    {{- end }}
+    {{- if .Values.configVars.auth.oidc.google.clientId }}
+    auth.oidc.google.clientId={{ .Values.configVars.auth.oidc.google.clientId }}
+    {{- end }}
+    {{- if .Values.configVars.auth.oidc.google.clientSecret }}
+    auth.oidc.google.clientSecret={{ .Values.configVars.auth.oidc.google.clientSecret }}
     {{- end }}
 
     auth.session.lifespan={{ .Values.configVars.auth.session.lifespan | default "24h" }}
     auth.sysAdmins={{ .Values.configVars.auth.sysAdmins | default "" }}
     auth.defaultRole={{ .Values.configVars.auth.defaultRole }}
     
-    # Cluster Configuration
     cluster.replicationFactor={{ .Values.cluster.replicationFactor | default 0 }}
     cluster.advertise.address={{ .Values.cluster.advertise.address | default "" }}
     cluster.advertise.allowInsecure={{ .Values.cluster.advertise.allowInsecure | default false }}
@@ -69,7 +68,6 @@ data:
     {{- fail "collector.envTag is deprecated. Please use configVars.envTag instead." }}
     {{- end }}
     
-    # Collector Configuration
     {{- if .Values.collector.otlp.grpc.disable }}
     collector.otlp.grpc-disable=true
     {{- else }}
@@ -89,7 +87,6 @@ data:
     collector.nr8t.port={{ .Values.collector.nr8t.port | default 3124 }}
     {{- end }}
     
-    # Retention Configuration
     files.retention={{ .Values.configVars.files.retention | default "720h" }}
     logs.retention={{ .Values.configVars.logs.retention | default "24h" }}
     {{- if .Values.configVars.logs.backup.destination }}
@@ -110,10 +107,8 @@ data:
     traces.retention={{ .Values.configVars.traces.retention | default "72h" }}
     traces.slowQueryThreshold={{ .Values.configVars.traces.slowQueryThreshold }}
     
-    # Tracegen Configuration
     tracegen.disable={{ .Values.configVars.tracegen.disable | default false }}
     
-    # Service Configuration
     http-port={{ .Values.service.port }}
     http-port-internal={{ .Values.service.internalPort }}
     service.admin.enabled={{ .Values.service.admin.enabled | default false }}
@@ -123,7 +118,6 @@ data:
     http-token-admin={{ .Values.service.admin.token }}
     {{- end }}
     
-    # Token (will be populated via secret)
     token={{ .Values.configVars.token }}
     
   {{- if .Values.configVars.alerts.configFile }}

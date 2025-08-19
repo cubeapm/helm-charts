@@ -174,12 +174,23 @@ spec:
 # 🔎 Validation block
 {{- $hasToken := false }}
 {{- $hasAuthSessionkey := false }}
+{{- $hasGithubClientSecret := .Values.configVars.auth.oidc.github.clientSecret }}
+{{- $hasGithubClientClientId := .Values.configVars.auth.oidc.github.clientId }}
+{{- $hasGoogleClientSecret := .Values.configVars.auth.oidc.google.clientSecret }}
+{{- $hasGoogleClientClientId := .Values.configVars.auth.oidc.google.clientId }}
+
 {{- range $e := default (list) .Values.extraEnvs }}
   {{- if eq $e.name "CUBE_TOKEN" }}
-    {{- $hasTokenEnv = true }}
+    {{- $hasToken = true }}
   {{- end }}
   {{- if eq $e.name "CUBE_AUTH_KEY_SESSION" }}
     {{- $hasAuthSessionkey = true }}
+  {{- end }}
+  {{- if eq $e.name "CUBE_AUTH_OIDC_GITHUB_CLIENT_SECRET" }}
+    {{- $hasGithubClientSecret = true }}
+  {{- end }}
+  {{- if eq $e.name "CUBE_AUTH_OIDC_GOOGLE_CLIENT_SECRET" }}
+    {{- $hasGoogleClientSecret = true }}
   {{- end }}
 {{- end }}
 
@@ -189,4 +200,12 @@ spec:
 
 {{- if not (or $hasAuthSessionkey .Values.configVars.auth.key.session) }}
   {{- fail "You must set CUBE_AUTH_KEY_SESSION via extraEnvs or set configVars.auth.key.session in ConfigMap" }}
+{{- end }}
+
+{{- if or (and $hasGithubClientSecret (not $hasGithubClientClientId)) (and $hasGithubClientClientId (not $hasGithubClientSecret)) }}
+  {{- fail "For GitHub OIDC, you must provide clientId via configVars.auth.oidc.github.clientId and clientSecret either via configVars.auth.oidc.github.clientSecret or extraEnvs (CUBE_AUTH_OIDC_GITHUB_CLIENT_SECRET)" }}
+{{- end }}
+
+{{- if or (and $hasGoogleClientSecret (not $hasGoogleClientClientId)) (and $hasGoogleClientClientId (not $hasGoogleClientSecret)) }}
+  {{- fail "For Google OIDC, you must provide clientId via configVars.auth.oidc.google.clientId and clientSecret either via configVars.auth.oidc.google.clientSecret or extraEnvs (CUBE_AUTH_OIDC_GOOGLE_CLIENT_SECRET)" }}
 {{- end }}
