@@ -1,0 +1,29 @@
+configVars:
+  token: "test-token-for-ci"
+  auth:
+    key:
+      session: "c0cb9f28e4e24a9a82251c1d8f246d1f"
+  baseUrl: "http://localhost:8080"
+  database:
+    url: "sqlite:///test.db?_fk=true"
+  alertmanager:
+    jira:
+      token: "test-jira-token"
+    oauth:
+      pagerduty:
+        appId: "test-pagerduty-app-id"
+      slack:
+        token: "test-slack-token"
+    opsgenie:
+      tokens: "test-opsgenie-token"
+
+persistence:
+  enabled: false
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"
