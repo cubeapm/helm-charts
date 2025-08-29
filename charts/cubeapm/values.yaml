@@ -45,6 +45,7 @@ tolerations: []
 topologySpreadConstraints: []
 podSecurityContext: {}
 podCustomLabels: {}
+podCustomAnnotations: {}
 
 securityContext: {}
 # -- Configure resource requests and limits. Update according to your workload.
