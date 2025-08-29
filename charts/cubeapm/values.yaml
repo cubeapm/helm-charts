@@ -45,17 +45,18 @@ tolerations: []
 topologySpreadConstraints: []
 podSecurityContext: {}
 podCustomLabels: {}
+podCustomAnnotations: {}
 
 securityContext: {}
 # -- Configure resource requests and limits. Update according to your workload.
 # Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 resources:
   requests:
-    cpu: 2
-    memory: 8Gi
+    cpu: 0.5
+    memory: 1Gi
   limits:
-    cpu: 2
-    memory: 8Gi
+    cpu: 0.5
+    memory: 1Gi
 
 image:
   registry: docker.io
@@ -67,7 +68,23 @@ configVars:
   # -- [Required] URL used by users to access CubeAPM. This is used to generate URLs in emails and alerts.
   # If you use reverse proxy and sub path specify full url (with sub path).
   # Examples: http://cube.yourdomain.com, https://yourdomain.com/cube, http://10.0.0.1:3125
-  baseUrl: https://cubeapm.yourdomain.com
+  baseUrl: http://localhost:3125
+  
+  # -- Secret Management Configuration
+  # Set to true to use Kubernetes secrets instead of values.yaml for sensitive data
+  useSecrets: false
+  
+  # -- Secret Key Mapping
+  # Define the keys to use when looking up values in Kubernetes secrets
+  # secretKeys:
+  #   token: "cube-token"
+  #   authSession: "cube-auth-session-key"
+  #   githubClientSecret: "cube-github-client-secret"
+  #   googleClientSecret: "cube-google-client-secret"
+  #   jiraToken: "cube-jira-token"
+  #   slackToken: "cube-slack-token"
+  #   opsgenieTokens: "cube-opsgenie-tokens"
+  #   adminToken: "cube-admin-token"
   database:
     # -- [Required] URL of database for storing config data (settings, dashboards, etc.)
     # Example:
@@ -98,9 +115,9 @@ configVars:
   # using browser's time zone setting, a few operations need to be performed on the server and they use
   # this setting.
   # Examples: America/Los_Angeles, Asia/Kolkata, UTC
-  timeZone: UTC
+  timeZone: Asia/Kolkata
   # -- [Required] Account token obtained from CubeAPM. This token is used for authentication with CubeAPM.
-  token: ""
+  token: "2d9a26241d834dd980604379c62263b7"
 
   alertmanager:
     charts:
@@ -168,7 +185,7 @@ configVars:
     key:
       # -- [Required] Encryption key for session data. Must be 32 characters long.
       # Can use hex encoded UUID without dashes.
-      session: ""
+      session: "c0cb9f28e4e24a9a82251c1d8f246d1f"
     oidc:
       github:
         # -- Client ID for Sign in with GitHub.
@@ -270,11 +287,51 @@ configVars:
     #       - label: http.status_code
     #         match: '4\d{2}'
 
+# -- Configuration Management
+# 
+# CubeAPM now supports conditional secret management with fallback:
+# 
+# 1. **Conditional Logic**: If useSecrets is true, use Kubernetes secrets
+# 2. **Fallback Source**: If useSecrets is false, use values from values.yaml
+# 3. **Secret Key Mapping**: Customize the keys used to look up values in secrets
+# 
+# This approach allows you to:
+# - Use values.yaml for development/testing (useSecrets: false)
+# - Use Kubernetes secrets for production (useSecrets: true)
+# - Customize secret keys via secretKeys configuration
+# - Have automatic fallback logic built into the Helm chart
+# 
+# Example configuration:
+# configVars:
+#   useSecrets: true  # Enable secret usage
+#   secretKeys:
+#     token: "my-custom-token-key"
+#     authSession: "my-custom-session-key"
+# 
+# The config.properties file is automatically generated from your values.yaml configuration
+# and mounted at /etc/cubeapm/config.properties in the container.
+
 # -- Environment variables to be passed to CubeAPM containers.
 # Example:
 #   - name: ENV_VARIABLE_NAME
 #     value: "env_variable_value"
-extraEnvs: []
+# 
+# Note: For sensitive values, consider using the secret reference approach:
+# - Set CUBE_SECRET_* environment variables with the keys to your secret map
+# - Leave the corresponding values empty in config.properties
+extraEnvs:
+  - name: CUBE_TOKEN
+    value: "2d9a26241d834dd980604379c62263b7"
+  # - name: CUBE_ALERTMANAGER_JIRA_TOKEN
+  #   value:
+  # - name: CUBE_ALERTMANAGER_OAUTH_PAGERDUTY_APP_ID
+  #   value:
+  # - name: CUBE_ALERTMANAGER_OAUTH_SLACK_TOKEN
+  #   value:
+  # - name: CUBE_ALERTMANAGER_OPSGENIE_TOKENS
+  #   value:
+  # - name: CUBE_DATABASE_URL
+  #   value:
 
 service:
   # -- Annotations to CubeAPM service
@@ -296,7 +353,7 @@ service:
     # If set, the token must be provided in the `Authorization` header of the requests.
     # Example:
     #   Authorization: Bearer <token>
-    token: ""
+    token: "8641b36ea0c94d988f12eb23022406cc"
 
 ingress:
   # -- Enable ingress for CubeAPM
@@ -476,10 +533,10 @@ collector:
 
 cluster:
   # -- Number of pods in the cluster
-  podCount: 1
+  podCount: 3
   # -- (int) Replication factor for the ingested data.
   # Default is size_of_cluster/2 + 1
-  replicationFactor: 0
+  replicationFactor: 1
   advertise:
     # -- Explicit address to advertise in cluster, e.g. 10.0.0.1.
     # If not specified, CubeAPM will try to detect the address automatically.
