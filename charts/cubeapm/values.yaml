@@ -61,7 +61,7 @@ resources:
 image:
   registry: docker.io
   repository: cubeapm/cubeapm
-  tag: v1.12.0
+  tag: v1.13.0
   pullPolicy: IfNotPresent
 
 configVars:
@@ -120,12 +120,12 @@ configVars:
     oauth:
       pagerduty:
         # -- App ID for sending alert notifications on PagerDuty.
-        # Refer https://docs.cubeapm.com/install/configure-cubeapm/connect-with-pagerduty-for-alerting for guidance.
+        # Refer https://docs.cubeapm.com/configure/alerting/connect-with-pagerduty for guidance.
         appId: ""
       slack:
         # -- Bot user OAuth token for sending alert notifications on Slack.
         # Slack bot tokens start with 'xoxb'.
-        # Refer https://docs.cubeapm.com/install/configure-cubeapm/connect-with-slack-for-alerting for guidance.
+        # Refer https://docs.cubeapm.com/configure/alerting/connect-with-slack for guidance.
         token: ""
     opsgenie:
       # -- API tokens for sending alert notifications on Opsgenie.
@@ -170,19 +170,49 @@ configVars:
       # -- [Required] Encryption key for session data. Must be 32 characters long.
       # Can use hex encoded UUID without dashes.
       session: ""
+    method:
+      email:
+        # -- Disable sign-up and sign-in using email/password
+        disable: false
+        # -- Enable sign-up and sign-in using webauthn
+      webauthn:
+        enable: false
+    mfa:
+      # -- Enforce Multi-Factor Authentication for all users
+      enforce: false
     oidc:
       github:
         # -- Client ID for Sign in with GitHub.
-        # Refer https://docs.cubeapm.com/install/configure-cubeapm/sign-in-with-github for guidance.
+        # Refer https://docs.cubeapm.com/configure/single-sign-on/sign-in-with-github for guidance.
         clientId: ""
         # -- Client secret for Sign in with GitHub
         clientSecret: ""
       google:
         # -- Client ID for Sign in with Google.
-        # Refer https://docs.cubeapm.com/install/configure-cubeapm/sign-in-with-google for guidance.
+        # Refer https://docs.cubeapm.com/configure/single-sign-on/sign-in-with-google for guidance.
         clientId: ""
         # -- Client secret for Sign in with Google
         clientSecret: ""
+      microsoft:
+        # -- Client ID for Sign in with Microsoft.
+        # Refer https://docs.cubeapm.com/configure/single-sign-on/sign-in-with-microsoft for guidance.
+        clientId: ""
+        # -- Client secret for Sign in with Microsoft
+        clientSecret: ""
+        # -- Client tenant for Sign in with Microsoft
+        tenant: ""
+      onelogin:
+        # -- Client ID for Sign in with OneLogin.
+        # Refer https://docs.cubeapm.com/configure/single-sign-on/sign-in-with-onelogin for guidance.
+        clientId: ""
+        # -- Client secret for Sign in with OneLogin
+        clientSecret: ""
+        # -- Issuer URL for OneLogin OIDC
+        issuerUrl: ""
+    selfservice:
+      signup:
+        # -- Disable self-service sign-up. Only admins will be able to add new users.
+        disable: false
     session:
       # -- Defines how long a session is active. Once that lifespan has been reached, the user needs to sign in again.
       lifespan: 24h
@@ -213,9 +243,12 @@ configVars:
         # -- The Storage Class applied to objects uploaded to AWS S3. Supported values are: GLACIER, DEEP_ARCHIVE, GLACIER_IR, INTELLIGENT_TIERING, ONEZONE_IA, OUTPOSTS, REDUCED_REDUNDANCY, STANDARD, STANDARD_IA.
         # See https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html.
         storageClass: ""
+    metering:
+      # -- Custom field to record logs ingestion volume by. For example, if set to 'service', CubeAPM will look for the field named 'service' in incoming logs, and will maintain ingestion volume service-wise.
+      extraField: ""
     datadog:
       # -- Comma separated list of Datadog tags to be used as stream fields.
-      streamFields: ""
+      streamFields: "service,functionname"
       # -- Comma separated list of Datadog tags to ignore.
       ignoreFields: ""
     newrelic:
@@ -241,15 +274,38 @@ configVars:
       #       tag: http.status_code
       #       match: '(\d)\d{2}'
       #       replace: '${1}xx'
+    newrelic:
+      # -- Compatibility mode for integration using New Relic agent.
+      # Possible values are legacy, modern.
+      compatibilityMode: legacy
     slo:
       # -- Config for SLOs (Service Level Objectives).
-      # See `values.yaml` for an example.
-      configFile: {}
-        # slos:
-        #   default:
-        #     error_budget_percent: 0.5
-        #     latency_threshold: 75ms
-        #     latency_budget_percent: 5
+      # Set `configFile: null` to disable SLOs if desired.
+      configFile:
+        slos:
+          # default for all services
+          default:
+            error_budget_percent: 0.5
+            latency_threshold: 100ms
+            latency_budget_percent: 5
+
+          # overrides for specific environments
+          # default_envs:
+          #   - env: UNSET
+          #     latency_threshold: 75ms
+          #     latency_budget_percent: 1
+          #   - env: UNSET
+          #     error_budget_percent: 0.1
+
+          # overrides for specific services
+          # default_services:
+          #   - env: UNSET
+          #     service: order-service
+          #     latency_threshold: 75ms
+          #     latency_budget_percent: 1
+          #   - env: UNSET
+          #     service: payment-service
+          #     error_budget_percent: 0.1
 
   tracegen:
     # -- Disable the built-in demo trace generator
@@ -257,7 +313,7 @@ configVars:
 
   traces:
     # -- Traces retention period. Must be at least 24h.
-    retention: 72h
+    retention: 168h
     # -- Minimum query duration for labeling database queries as slow.
     slowQueryThreshold: 500ms
     # -- Config for creating custom indexes on traces.
@@ -286,6 +342,8 @@ service:
   port: 3125
   # -- Port to use for internal http communication between CubeAPM nodes
   internalPort: 3130
+  # -- Port to use for calling CubeAPM APIs over private network
+  privatePort: 3140
   admin:
     # -- Enable admin http server for managing CubeAPM (e.g. delete user accounts) via APIs.
     enabled: false
@@ -315,6 +373,22 @@ ingress:
   # -- CubeAPM Ingress TLS
   tls: []
 
+ingressAdmin:
+  # -- Enable admin ingress for CubeAPM
+  enabled: false
+  # -- Ingress Class Name to be used to identify ingress controllers
+  className: ""
+  # -- Annotations to CubeAPM Ingress
+  annotations: {}
+  # -- CubeAPM Ingress Host names with their path details
+  hosts:
+    - host: cubeapm-admin.yourdomain.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  # -- CubeAPM Ingress TLS
+  tls: []
+
 # https://github.com/kubernetes-sigs/aws-load-balancer-controller
 # It satisfies Kubernetes Ingress resources by provisioning Application Load Balancers.
 # It satisfies Kubernetes Service resources by provisioning Network Load Balancers.
@@ -337,9 +411,13 @@ ingressTraces:
     # will have to be used as CubeAPM does not handle TLS by itself.
     #
     # Note that this ingress must be configured to use GRPC protocol for
-    # forwarding traffic to the service. For kubernetes nginx ingress
-    # controller, this can be achieved by setting the annotation
-    # nginx.ingress.kubernetes.io/backend-protocol: GRPC
+    # forwarding traffic to the service.
+    # For kubernetes nginx ingress controller, this can be achieved by setting the annotation
+    #   nginx.ingress.kubernetes.io/backend-protocol: GRPC
+    # For AWS load balancer controller, the following annotations are needed
+    # Ref: https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.8/guide/ingress/annotations/
+    #   alb.ingress.kubernetes.io/backend-protocol-version: GRPC
+    #   alb.ingress.kubernetes.io/success-codes: 0-16
     #
     # Note also that this ingress may not work properly without TLS, depending
     # on the ingress controller being used (e.g. nginx).
@@ -402,9 +480,19 @@ ingressTraces:
     # configured in this ingress.
     #
     # Note that this ingress must be configured to use GRPC protocol for
-    # forwarding traffic to the service. For kubernetes nginx ingress
-    # controller, this can be achieved by setting the annotation
-    # nginx.ingress.kubernetes.io/backend-protocol: GRPC
+    # forwarding traffic to the service.
+    # For kubernetes nginx ingress controller, this can be achieved by setting the annotation
+    #   nginx.ingress.kubernetes.io/backend-protocol: GRPC
+    # For AWS load balancer controller, the following annotations are needed
+    # Ref: https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.8/guide/ingress/annotations/
+    #   alb.ingress.kubernetes.io/backend-protocol-version: GRPC
+    #   alb.ingress.kubernetes.io/success-codes: 0-16
+    #
+    # For nginx ingress controller, underscores in headers need to be allowed
+    # by editing the nginx controller configmap, and then restarting the nginx
+    # ingress controller deployment so that the config change takes effect.
+    # https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#enable-underscores-in-headers
+    # kubectl rollout restart deployment <nginx_ingress_controller_deployment_name>
     #
     # Note also that TLS is mandatory for New Relic Infinite Tracing.
     enabled: false

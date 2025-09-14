@@ -75,6 +75,9 @@ spec:
             - name: http-internal
               containerPort: {{ .Values.service.internalPort }}
               protocol: TCP
+            - name: http-private
+              containerPort: {{ .Values.service.privatePort }}
+              protocol: TCP
             {{- if .Values.service.admin.enabled }}
             - name: http-admin
               containerPort: {{ .Values.service.admin.port }}
@@ -132,6 +135,8 @@ spec:
               value: {{ .Values.service.port | quote }}
             - name: CUBE_HTTP_PORT_INTERNAL
               value: {{ .Values.service.internalPort | quote }}
+            - name: CUBE_HTTP_PORT_PRIVATE
+              value: {{ .Values.service.privatePort | quote }}
             {{- if .Values.service.admin.enabled }}
             - name: CUBE_HTTP_HOST_ADMIN
               value: '0.0.0.0'
@@ -176,6 +181,18 @@ spec:
               value: {{ .Values.configVars.auth.database.url }}
             - name: CUBE_AUTH_KEY_SESSION
               value: {{ required "A valid configVars.auth.key.session is required!" .Values.configVars.auth.key.session }}
+            {{- if .Values.configVars.auth.method.email.disable }}
+            - name: CUBE_AUTH_METHOD_EMAIL_DISABLE
+              value: "true"
+            {{- end }}
+            {{- if .Values.configVars.auth.method.webauthn.enable }}
+            - name: CUBE_AUTH_METHOD_WEBAUTHN_ENABLE
+              value: "true"
+            {{- end }}
+            {{- if .Values.configVars.auth.mfa.enforce }}
+            - name: CUBE_AUTH_MFA_ENFORCE
+              value: "true"
+            {{- end }}
             {{- if or .Values.configVars.auth.oidc.github.clientId .Values.configVars.auth.oidc.github.clientSecret }}
             - name: CUBE_AUTH_OIDC_GITHUB_CLIENT_ID
               value: {{ required "A valid configVars.auth.oidc.github.clientId is also required if configVars.auth.oidc.github.clientSecret is set!" .Values.configVars.auth.oidc.github.clientId }}
@@ -187,6 +204,26 @@ spec:
               value: {{ required "A valid configVars.auth.oidc.google.clientId is also required if configVars.auth.oidc.google.clientSecret is set!" .Values.configVars.auth.oidc.google.clientId }}
             - name: CUBE_AUTH_OIDC_GOOGLE_CLIENT_SECRET
               value: {{ required "A valid configVars.auth.oidc.google.clientSecret is also required if configVars.auth.oidc.google.clientId is set!" .Values.configVars.auth.oidc.google.clientSecret }}
+            {{- end }}
+            {{- if or .Values.configVars.auth.oidc.microsoft.clientId .Values.configVars.auth.oidc.microsoft.clientSecret .Values.configVars.auth.oidc.microsoft.tenant }}
+            - name: CUBE_AUTH_OIDC_MICROSOFT_CLIENT_ID
+              value: {{ required "A valid configVars.auth.oidc.microsoft.clientId is also required if configVars.auth.oidc.microsoft.clientSecret or configVars.auth.oidc.microsoft.tenant is set!" .Values.configVars.auth.oidc.microsoft.clientId }}
+            - name: CUBE_AUTH_OIDC_MICROSOFT_CLIENT_SECRET
+              value: {{ required "A valid configVars.auth.oidc.microsoft.clientSecret is also required if configVars.auth.oidc.microsoft.clientId or configVars.auth.oidc.microsoft.tenant is set!" .Values.configVars.auth.oidc.microsoft.clientSecret }}
+            - name: CUBE_AUTH_OIDC_MICROSOFT_TENANT
+              value: {{ required "A valid configVars.auth.oidc.microsoft.tenant is also required if configVars.auth.oidc.microsoft.clientId or configVars.auth.oidc.microsoft.clientSecret is set!" .Values.configVars.auth.oidc.microsoft.tenant }}
+            {{- end }}
+            {{- if or .Values.configVars.auth.oidc.onelogin.clientId .Values.configVars.auth.oidc.onelogin.clientSecret .Values.configVars.auth.oidc.onelogin.issuerUrl }}
+            - name: CUBE_AUTH_OIDC_ONELOGIN_CLIENT_ID
+              value: {{ required "A valid configVars.auth.oidc.onelogin.clientId is also required if configVars.auth.oidc.onelogin.clientSecret or configVars.auth.oidc.onelogin.issuerUrl is set!" .Values.configVars.auth.oidc.onelogin.clientId }}
+            - name: CUBE_AUTH_OIDC_ONELOGIN_CLIENT_SECRET
+              value: {{ required "A valid configVars.auth.oidc.onelogin.clientSecret is also required if configVars.auth.oidc.onelogin.clientId or configVars.auth.oidc.onelogin.issuerUrl is set!" .Values.configVars.auth.oidc.onelogin.clientSecret }}
+            - name: CUBE_AUTH_OIDC_ONELOGIN_ISSUER_URL
+              value: {{ required "A valid configVars.auth.oidc.onelogin.issuerUrl is also required if configVars.auth.oidc.onelogin.clientId or configVars.auth.oidc.onelogin.clientSecret is set!" .Values.configVars.auth.oidc.onelogin.issuerUrl }}
+            {{- end }}
+            {{- if .Values.configVars.auth.selfservice.signup.disable }}
+            - name: CUBE_AUTH_SELFSERVICE_SIGNUP_DISABLE
+              value: "true"
             {{- end }}
             - name: CUBE_AUTH_SESSION_LIFESPAN
               value: {{ .Values.configVars.auth.session.lifespan }}
@@ -266,6 +303,8 @@ spec:
             - name: CUBE_LOGS_BACKUP_S3_STORAGE_CLASS
               value: {{ .Values.configVars.logs.backup.s3.storageClass }}
             {{- end }}
+            - name: CUBE_LOGS_METERING_EXTRA_FIELD
+              value: {{ .Values.configVars.logs.metering.extraField }}
             - name: CUBE_LOGS_DATADOG_STREAM_FIELDS
               value: {{ .Values.configVars.logs.datadog.streamFields }}
             - name: CUBE_LOGS_DATADOG_IGNORE_FIELDS
@@ -278,6 +317,8 @@ spec:
               value: {{ .Values.configVars.metrics.retention }}
             - name: CUBE_METRICS_UPDATE_INTERVAL
               value: {{ .Values.configVars.metrics.updateInterval }}
+            - name: CUBE_METRICS_NR_COMPATIBILITY_MODE
+              value: {{ .Values.configVars.metrics.newrelic.compatibilityMode }}
             {{- if .Values.configVars.tracegen.disable }}
             - name: CUBE_TRACEGEN_DISABLE
               value: "true"
