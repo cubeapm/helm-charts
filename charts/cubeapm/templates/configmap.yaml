@@ -19,6 +19,10 @@ data:
   slo.yml: |
     {{- toYaml .Values.configVars.metrics.slo.configFile | nindent 4 }}
   {{- end }}
+  {{- if .Values.configVars.metrics.gcp.configFile }}
+  gcp_metrics.yml: |
+    {{- toYaml .Values.configVars.metrics.gcp.configFile | nindent 4 }}
+  {{- end }}
   {{- if .Values.collector.spanTransformsConfigFile }}
   span_transforms.yml: |
     {{- toYaml .Values.collector.spanTransformsConfigFile | nindent 4 }}

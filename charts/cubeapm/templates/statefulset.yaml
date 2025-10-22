@@ -65,6 +65,9 @@ spec:
             {{- if .Values.configVars.metrics.slo.configFile }}
             - "--metrics.slo.config-file=/etc/cubeapm/slo.yml"
             {{- end }}
+            {{- if .Values.configVars.metrics.gcp.configFile }}
+            - "--metrics.gcp.config-file=/etc/cubeapm/gcp_metrics.yml"
+            {{- end }}
             {{- if .Values.collector.spanTransformsConfigFile }}
             - "--collector.span-transforms-config-file=/etc/cubeapm/span_transforms.yml"
             {{- end }}

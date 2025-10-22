@@ -306,6 +306,16 @@ configVars:
           #   - env: UNSET
           #     service: payment-service
           #     error_budget_percent: 0.1
+    gcp:
+      # -- Google Cloud Platform metrics list
+      configFile: {}
+        # collection_interval: 60s
+        # projects:
+        #   - id: my-project-123456
+        #     env: UNSET
+        # metrics:
+        #   - cloudsql.googleapis.com/database/cpu/utilization
+
 
   tracegen:
     # -- Disable the built-in demo trace generator
