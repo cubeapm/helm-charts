@@ -75,6 +75,7 @@ configVars:
     #  mysql://<username>:<password>@tcp(<host>:3306)/<db_name>
     #  postgres://<username>:<password>@<host>:5432/<db_name>?sslmode=disable
     # Note: A-Za-z0-9.-_ characters are safe for use in password. Other characters can cause problems.
+    # Alternatively, set CUBE_DATABASE_URL environment variable in extraEnvs section to use k8s secret.
     url: ""
   # -- Tag name for environment.
   # If set, the value of this tag in logs, metrics, and traces
@@ -94,6 +95,7 @@ configVars:
     # Example:
     #  smtp://<username>:<password>@<mailserver>:25/?disable_starttls=false
     # Note: username and password must be url-encoded to escape any special characters.
+    # Alternatively, set CUBE_SMTP_URL environment variable in extraEnvs section to use k8s secret.
     url: ""
   # -- Timezone of CubeAPM users. While most of the timezone related operations are done on the browser
   # using browser's time zone setting, a few operations need to be performed on the server and they use
@@ -101,6 +103,7 @@ configVars:
   # Examples: America/Los_Angeles, Asia/Kolkata, UTC
   timeZone: UTC
   # -- [Required] Account token obtained from CubeAPM. This token is used for authentication with CubeAPM.
+  # Alternatively, set CUBE_TOKEN environment variable in extraEnvs section to use k8s secret.
   token: ""
 
   alertmanager:
@@ -112,6 +115,7 @@ configVars:
       # If you access Jira on https://youraccountid.atlassian.net, the site name is youraccountid.
       siteName: ""
       # -- API token for sending alert notifications on Jira.
+      # Alternatively, set CUBE_ALERTMANAGER_JIRA_TOKEN environment variable in extraEnvs section to use k8s secret.
       token: ""
       # -- Expiry date of the Jira API token in YYYY-MM-DD format. Will be used to remind when the token is about to expire.
       tokenExpiryDate: ""
@@ -126,10 +130,12 @@ configVars:
         # -- Bot user OAuth token for sending alert notifications on Slack.
         # Slack bot tokens start with 'xoxb'.
         # Refer https://docs.cubeapm.com/configure/alerting/connect-with-slack for guidance.
+        # Alternatively, set CUBE_ALERTMANAGER_OAUTH_SLACK_TOKEN environment variable in extraEnvs section to use k8s secret.
         token: ""
     opsgenie:
       # -- API tokens for sending alert notifications on Opsgenie.
       # Format: team1:token1,team2:token2,...,teamN:tokenN
+      # Alternatively, set CUBE_ALERTMANAGER_OPSGENIE_TOKENS environment variable in extraEnvs section to use k8s secret.
       tokens: ""
 
   alerts:
@@ -165,10 +171,12 @@ configVars:
       #  mysql://<username>:<password>@tcp(<host>:3306)/<db_name>
       #  postgres://<username>:<password>@<host>:5432/<db_name>?sslmode=disable
       # Note: A-Za-z0-9.-_ characters are safe for use in password. Other characters can cause problems.
+      # Alternatively, set CUBE_AUTH_DATABASE_URL environment variable in extraEnvs section to use k8s secret.
       url: ""
     key:
       # -- [Required] Encryption key for session data. Must be 32 characters long.
       # Can use hex encoded UUID without dashes.
+      # Alternatively, set CUBE_AUTH_KEY_SESSION environment variable in extraEnvs section to use k8s secret.
       session: ""
     method:
       email:
@@ -186,18 +194,21 @@ configVars:
         # Refer https://docs.cubeapm.com/configure/single-sign-on/sign-in-with-github for guidance.
         clientId: ""
         # -- Client secret for Sign in with GitHub
+        # Alternatively, set CUBE_AUTH_OIDC_GITHUB_CLIENT_SECRET environment variable in extraEnvs section to use k8s secret.
         clientSecret: ""
       google:
         # -- Client ID for Sign in with Google.
         # Refer https://docs.cubeapm.com/configure/single-sign-on/sign-in-with-google for guidance.
         clientId: ""
         # -- Client secret for Sign in with Google
+        # Alternatively, set CUBE_AUTH_OIDC_GOOGLE_CLIENT_SECRET environment variable in extraEnvs section to use k8s secret.
         clientSecret: ""
       microsoft:
         # -- Client ID for Sign in with Microsoft.
         # Refer https://docs.cubeapm.com/configure/single-sign-on/sign-in-with-microsoft for guidance.
         clientId: ""
         # -- Client secret for Sign in with Microsoft
+        # Alternatively, set CUBE_AUTH_OIDC_MICROSOFT_CLIENT_SECRET environment variable in extraEnvs section to use k8s secret.
         clientSecret: ""
         # -- Client tenant for Sign in with Microsoft
         tenant: ""
@@ -206,6 +217,7 @@ configVars:
         # Refer https://docs.cubeapm.com/configure/single-sign-on/sign-in-with-onelogin for guidance.
         clientId: ""
         # -- Client secret for Sign in with OneLogin
+        # Alternatively, set CUBE_AUTH_OIDC_ONELOGIN_CLIENT_SECRET environment variable in extraEnvs section to use k8s secret.
         clientSecret: ""
         # -- Issuer URL for OneLogin OIDC
         issuerUrl: ""
@@ -341,6 +353,11 @@ configVars:
 # Example:
 #   - name: ENV_VARIABLE_NAME
 #     value: "env_variable_value"
+#   - name: CUBE_TOKEN
+#     valueFrom:
+#       secretKeyRef:
+#         name: cubeapm-secrets
+#         key: token
 extraEnvs: []
 
 service:
@@ -365,6 +382,7 @@ service:
     # If set, the token must be provided in the `Authorization` header of the requests.
     # Example:
     #   Authorization: Bearer <token>
+    # Alternatively, set CUBE_HTTP_TOKEN_ADMIN environment variable in extraEnvs section to use k8s secret.
     token: ""
 
 ingress:
