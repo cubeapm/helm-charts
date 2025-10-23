@@ -27,3 +27,500 @@ data:
   span_transforms.yml: |
     {{- toYaml .Values.collector.spanTransformsConfigFile | nindent 4 }}
   {{- end }}
+  config.properties: |
+    ## CubeAPM configuration file
+    ## CubeAPM will read this file on startup
+
+
+
+    ## Mandatory Parameters: CubeAPM will not start if any of these is not provided
+
+    # Account token obtained from CubeAPM. This token is used for authentication with CubeAPM.
+    token={{ .Values.configVars.token }}
+
+    # Encryption key for session data. Must be 32 characters long. Can use hex encoded UUID without dashes.
+    auth.key.session={{ .Values.configVars.auth.key.session }}
+
+
+
+    ## Important Parameters: You will quite likely need to set these as per your environment for CubeAPM to work properly.
+
+    # URL used by users to access CubeAPM. This is used to generate URLs in emails and alerts.
+    # If you use reverse proxy and sub path specify full url (with sub path).
+    # Examples: http://cube.yourdomain.com, https://yourdomain.com/cube, http://10.0.0.1:3125
+    base-url={{ .Values.configVars.baseUrl }}
+
+    # Comma separated list of email ids of users to be given sysadmin privilege.
+    auth.sys-admins={{ .Values.configVars.auth.sysAdmins }}
+
+    # Comma separated list of all nodes in the cluster, e.g., 10.0.0.1,10.0.0.2,10.0.0.3. Leave empty for single node operation.
+    {{- if gt (int .Values.cluster.podCount) 1 }}
+    {{- $list := list }}
+    {{- $fullName := include "cubeapm.fullname" . }}
+    {{- range $i := until (int .Values.cluster.podCount) }}
+    {{- $list = append $list (printf "%s-%d.%s-headless" ($fullName) ($i) ($fullName | trunc 54 | trimSuffix "-")) }}
+    {{- end }}
+    cluster.peers={{ join "," $list }}
+    {{- else }}
+    #cluster.peers=
+    {{- end }}
+
+    # Timezone of CubeAPM users. While most of the timezone related operations are done on the browser using browser's time zone setting, a few operations need to be performed on the server and they use this setting.
+    # Examples: America/Los_Angeles, Asia/Kolkata, UTC
+    time-zone={{ .Values.configVars.timeZone }}
+
+
+
+    ## Optional Parameters
+
+    # URL of database for storing config data (settings, dashboards, etc.).
+    # Example:
+    #  database.url=mysql://<username>:<password>@tcp(<host>:3306)/<db_name>
+    #  database.url=postgres://<username>:<password>@<host>:5432/<db_name>?sslmode=disable
+    # Note: A-Za-z0-9.-_ characters are safe for use in password. Other characters can cause problems.
+    database.url={{ .Values.configVars.database.url }}
+
+    # URL of database for storing user accounts data.
+    # Example:
+    #  auth.database.url=mysql://<username>:<password>@tcp(<host>:3306)/<db_name>
+    #  auth.database.url=postgres://<username>:<password>@<host>:5432/<db_name>?sslmode=disable
+    # Note: A-Za-z0-9.-_ characters are safe for use in password. Other characters can cause problems.
+    auth.database.url={{ .Values.configVars.auth.database.url }}
+
+    # Client ID for Sign in with GitHub
+    auth.oidc.github.client-id={{ .Values.configVars.auth.oidc.github.clientId }}
+
+    # Client secret for Sign in with GitHub
+    auth.oidc.github.client-secret={{ .Values.configVars.auth.oidc.github.clientSecret }}
+
+    # Client ID for Sign in with Google
+    auth.oidc.google.client-id={{ .Values.configVars.auth.oidc.google.clientId }}
+
+    # Client secret for Sign in with Google
+    auth.oidc.google.client-secret={{ .Values.configVars.auth.oidc.google.clientSecret }}
+
+    # Client ID for Sign in with Microsoft
+    auth.oidc.microsoft.client-id={{ .Values.configVars.auth.oidc.microsoft.clientId }}
+
+    # Client secret for Sign in with Microsoft
+    auth.oidc.microsoft.client-secret={{ .Values.configVars.auth.oidc.microsoft.clientSecret }}
+
+    # Client tenant for Sign in with Microsoft
+    auth.oidc.microsoft.tenant={{ .Values.configVars.auth.oidc.microsoft.tenant }}
+
+    # Client ID for Sign in with OneLogin
+    auth.oidc.onelogin.client-id={{ .Values.configVars.auth.oidc.onelogin.clientId }}
+
+    # Client secret for Sign in with OneLogin
+    auth.oidc.onelogin.client-secret={{ .Values.configVars.auth.oidc.onelogin.clientSecret }}
+
+    # Issuer URL for OneLogin OIDC
+    auth.oidc.onelogin.issuer-url={{ .Values.configVars.auth.oidc.onelogin.issuerUrl }}
+
+    # App ID for sending alert notifications on PagerDuty.
+    alertmanager.oauth.pagerduty.app-id={{ .Values.configVars.alertmanager.oauth.pagerduty.appId }}
+
+    # Bot user OAuth token for sending alert notifications on Slack. Slack bot tokens start with 'xoxb'.
+    alertmanager.oauth.slack.token={{ .Values.configVars.alertmanager.oauth.slack.token }}
+
+    # Name of the site for sending alert notifications on Jira. If you access Jira on https://youraccountid.atlassian.net, the site name is youraccountid.
+    alertmanager.jira.site-name={{ .Values.configVars.alertmanager.jira.siteName }}
+
+    # API token for sending alert notifications on Jira.
+    alertmanager.jira.token={{ .Values.configVars.alertmanager.jira.token }}
+
+    # Expiry date of the Jira API token in YYYY-MM-DD format. Will be used to remind when the token is about to expire.
+    alertmanager.jira.token-expiry-date={{ .Values.configVars.alertmanager.jira.tokenExpiryDate }}
+
+    # Email address of Jira user for sending alert notifications on Jira.
+    alertmanager.jira.user-email={{ .Values.configVars.alertmanager.jira.userEmail }}
+
+    # API tokens for sending alert notifications on Opsgenie.
+    # Format: team1:token1,team2:token2,...,teamN:tokenN
+    alertmanager.opsgenie.tokens={{ .Values.configVars.alertmanager.opsgenie.tokens }}
+
+    # URL of SMTP server for sending emails, e.g., reset password email, alert notifications.
+    # Example:
+    #  smtp.url=smtp://<username>:<password>@<mailserver>:25/?disable_starttls=false
+    # Note: username and password must be url-encoded to escape any special characters.
+    smtp.url={{ .Values.configVars.smtp.url }}
+
+    # Email address of sender. Your SMTP server must be configured to allow sending emails from this address.
+    {{- if .Values.configVars.smtp.from }}
+    smtp.from={{ .Values.configVars.smtp.from }}
+    {{- else }}
+    #smtp.from=
+    {{- end }}
+
+    # Disable the built-in demo trace generator
+    tracegen.disable={{ .Values.configVars.tracegen.disable }}
+
+    # The number of concurrent workers. 0 means equal to number of available CPUs.
+    logs.backup.concurrency={{ .Values.configVars.logs.backup.concurrency }}
+
+    # Path to file with GCS or S3 credentials. Credentials are loaded from default locations if not set.
+    # See https://docs.aws.amazon.com/credref/latest/refdocs/file-location.html#file-location and https://cloud.google.com/iam/docs/creating-managing-service-account-keys.
+    #logs.backup.creds-file-path=
+
+    # Where to put the backup on the remote storage.
+    # Example: s3://bucket/path/to/backup, gs://bucket/path/to/backup, azblob://container/path/to/backup or fs:///path/to/local/backup/dir
+    logs.backup.destination={{ .Values.configVars.logs.backup.destination }}
+
+    # Path to file with S3 configs. Configs are loaded from default location if not set.
+    # See https://docs.aws.amazon.com/credref/latest/refdocs/file-location.html#file-location.
+    #logs.backup.s3.config-file-path=
+
+    # Profile name for S3 configs. If no set, the value of the environment variable will be loaded (AWS_PROFILE or AWS_DEFAULT_PROFILE), or if both not set, DefaultSharedConfigProfile is used.
+    #logs.backup.s3.config-profile=
+
+    # Custom S3 endpoint for use with S3-compatible storages (e.g. MinIO). S3 is used if not set.
+    logs.backup.s3.custom-endpoint={{ .Values.configVars.logs.backup.s3.customEndpoint }}
+
+    # Prefixing endpoint with bucket name when set false.
+    logs.backup.s3.force-path-style={{ .Values.configVars.logs.backup.s3.forcePathStyle }}
+
+    # The Storage Class applied to objects uploaded to AWS S3. Supported values are: GLACIER, DEEP_ARCHIVE, GLACIER_IR, INTELLIGENT_TIERING, ONEZONE_IA, OUTPOSTS, REDUCED_REDUNDANCY, STANDARD, STANDARD_IA.
+    # See https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html.
+    logs.backup.s3.storage-class={{ .Values.configVars.logs.backup.s3.storageClass }}
+
+    # Minimal allowed log Level. Supported values are debug, info, warn, and error.
+    log-level={{ .Values.configVars.logLevel }}
+
+    # Whether to enable enrichment of AWS CloudWatch metrics with AWS tags. If enabled, the configured AWS credentials should have AWSResourceGroupsReadOnlyAccess IAM policy attached.
+    #metrics.aws.tags.enable=false
+
+    # Path to file with AWS configs. Configs are loaded from default location if not set.
+    # See https://docs.aws.amazon.com/credref/latest/refdocs/file-location.html#file-location.
+    #metrics.aws.tags.config-file-path=
+
+    # Profile name for AWS configs. If no set, the value of the environment variable will be loaded (AWS_PROFILE or AWS_DEFAULT_PROFILE), or if both not set, DefaultSharedConfigProfile is used.
+    #metrics.aws.tags.config-profile=
+
+    # Path to file with AWS credentials. Credentials are loaded from default locations if not set.
+    # See https://docs.aws.amazon.com/credref/latest/refdocs/file-location.html#file-location.
+    #metrics.aws.tags.creds-file-path=
+
+    # Path to config file for filtering rules for AWS tags. If not set, all tags will be added to metrics.
+    #metrics.aws.tags.filters-config-file=
+
+    # Path to YAML config file for Google Cloud Platform metrics list.
+    {{- if .Values.configVars.metrics.gcp.configFile }}
+    metrics.gcp.config-file==/etc/cubeapm/gcp_metrics.yml
+    {{- else }}
+    #metrics.gcp.config-file=
+    {{- end }}
+
+
+
+    ## Tuning Parameters
+
+    # Logs retention period. Must be at least 24h.
+    logs.retention={{ .Values.configVars.logs.retention }}
+
+    # Metrics retention period. Must be at least 24h.
+    metrics.retention={{ .Values.configVars.metrics.retention }}
+
+    # Traces retention period. Must be at least 24h.
+    traces.retention={{ .Values.configVars.traces.retention }}
+
+    # Static files (e.g. javascript source maps) retention period
+    files.retention={{ .Values.configVars.files.retention }}
+
+    # Minimum query duration for labeling database queries as slow.
+    traces.slow-query-threshold={{ .Values.configVars.traces.slowQueryThreshold }}
+
+    # Access key for requests from Amazon Data Firehose. If provided, CubeAPM will match the access key before accepting data from Amazon Data Firehose.
+    #logs.aws.data-firehose.access-key=
+
+    # Comma separated list of log fields to be used as stream fields.
+    #logs.aws.data-firehose.stream-fields=logGroup
+
+    # Comma separated list of Coralogix tags to be used as stream fields.
+    #logs.coralogix.stream-fields=applicationName,subsystemName
+
+    # Comma separated list of Coralogix tags to ignore.
+    #logs.coralogix.ignore-fields=
+
+    # Comma separated list of Datadog tags to be used as stream fields.
+    logs.datadog.stream-fields={{ .Values.configVars.logs.datadog.streamFields }}
+
+    # Comma separated list of Datadog tags to ignore.
+    logs.datadog.ignore-fields={{ .Values.configVars.logs.datadog.ignoreFields }}
+
+    # Comma separated list of New Relic tags to be used as stream fields.
+    logs.newrelic.stream-fields={{ .Values.configVars.logs.newrelic.streamFields }}
+
+    # Comma separated list of New Relic tags to ignore.
+    logs.newrelic.ignore-fields={{ .Values.configVars.logs.newrelic.ignoreFields }}
+
+    # Disable log ingestion by default.
+    #logs.ingestion.disable=false
+
+    # Invert Amazon Data Firehose log receiver - enable if default is disabled, and disable if default is enable.
+    #logs.aws.data-firehose.invert=false
+
+    # Invert Coralogix log receiver - enable if default is disabled, and disable if default is enable.
+    #logs.coralogix.invert=false
+
+    # Access key for requests to Coralogix receiver. If provided, CubeAPM will match the access key before accepting data on Coralogix receiver.
+    #logs.coralogix.access-key=
+
+    # Invert Datadog log receiver - enable if default is disabled, and disable if default is enable.
+    #logs.datadog.invert=false
+
+    # Access key for requests to Datadog receiver. If provided, CubeAPM will match the access key before accepting data on Datadog receiver.
+    #logs.datadog.access-key=
+
+    # Invert ElasticSearch log receiver - enable if default is disabled, and disable if default is enable.
+    #logs.elasticsearch.invert=false
+
+    # Access key for requests to ElasticSearch receiver. If provided, CubeAPM will match the access key before accepting data on ElasticSearch receiver.
+    #logs.elasticsearch.access-key=
+
+    # Invert JSONline log receiver - enable if default is disabled, and disable if default is enable.
+    #logs.jsonline.invert=false
+
+    # Access key for requests to JSONline receiver. If provided, CubeAPM will match the access key before accepting data on JSONline receiver.
+    #logs.jsonline.access-key=
+
+    # Invert Loki log receiver - enable if default is disabled, and disable if default is enable.
+    #logs.loki.invert=false
+
+    # Access key for requests to Loki receiver. If provided, CubeAPM will match the access key before accepting data on Loki receiver.
+    #logs.loki.access-key=
+
+    # Invert New Relic log receiver - enable if default is disabled, and disable if default is enable.
+    #logs.newrelic.invert=false
+
+    # Access key for requests to New Relic receiver. If provided, CubeAPM will match the access key before accepting data on New Relic receiver.
+    #logs.newrelic.access-key=
+
+    # Invert OTel log receiver - enable if default is disabled, and disable if default is enable.
+    #logs.otel.invert=false
+
+    # Access key for requests to OTel receiver. If provided, CubeAPM will match the access key before accepting data on OTel receiver.
+    #logs.otel.access-key=
+
+
+
+    ## Default values are generally good for the following parameters
+
+    # Host to bind http server on
+    #http-host=0.0.0.0
+
+    # Port to bind http server on
+    http-port={{ .Values.service.port }}
+
+    # Port to use for internal http communication between CubeAPM nodes
+    http-port-internal={{ .Values.service.internalPort }}
+
+    # Port to use for calling CubeAPM APIs over private network
+    http-port-private={{ .Values.service.privatePort }}
+
+    # Port to use for internal distribution of incoming traces data
+    cluster.port.distributor={{ .Values.cluster.port.distributor }}
+
+    # Port to use for internal exchange of data between nodes for serving read requests
+    cluster.port.read={{ .Values.cluster.port.read }}
+
+    # Port to use for internal exchange of data between nodes for maintaining cluster state
+    cluster.port.state={{ .Values.cluster.port.state }}
+
+    # Port to use for internal exchange of data between nodes for serving write requests
+    cluster.port.write={{ .Values.cluster.port.write }}
+
+    # Ignore the environment field sent by Elastic APM agents.
+    #collector.elastic.ignore-environment=false
+
+    # Disable New Relic infinite tracing receiver
+    collector.nr.8t-disable={{ .Values.collector.nr8t.disable }}
+
+    # Host to bind New Relic infinite tracing receiver on
+    #collector.nr.8t-host=0.0.0.0
+
+    # Port to bind New Relic infinite tracing receiver on
+    collector.nr.8t-port={{ .Values.collector.nr8t.port }}
+
+    # Disable OTLP grpc receiver
+    collector.otlp.grpc-disable={{ .Values.collector.otlp.grpc.disable }}
+
+    # Host to bind OTLP grpc receiver on
+    #collector.otlp.grpc-host=0.0.0.0
+
+    # Port to bind OTLP grpc receiver on
+    collector.otlp.grpc-port={{ .Values.collector.otlp.grpc.port }}
+
+    # Disable OTLP http receiver
+    collector.otlp.http-disable={{ .Values.collector.otlp.http.disable }}
+
+    # Host to bind OTLP http receiver on
+    #collector.otlp.http-host=0.0.0.0
+
+    # Port to bind OTLP http receiver on
+    collector.otlp.http-port={{ .Values.collector.otlp.http.port }}
+
+    # Disable charts in alert notifications
+    alertmanager.charts.disable={{ .Values.configVars.alertmanager.charts.disable }}
+
+
+
+    ## Advanced Parameters: Changing values of these parameters can impact CubeAPM performance adversely, hence these should not be changed without consultation with CubeAPM support team
+
+    # Directory to store data in (default "./data")
+    #data-dir=
+
+    # Tag name for environment.
+    # If set, the value of this tag in logs, metrics, and traces will be used to segragate them in the UI.
+    {{- if .Values.configVars.envTag }}
+    env-tag={{ .Values.configVars.envTag }}
+    {{- else }}
+    #env-tag=cube.environment
+    {{- end }}
+
+    # Path to config file for alerts.
+    {{- if .Values.configVars.alerts.configFile }}
+    alerts.config-file=/etc/cubeapm/alerts.yml
+    {{- else }}
+    #alerts.config-file=
+    {{- end }}
+
+    # Default role to be assigned to a new user on signup.
+    # Possible values are none, viewer, editor, admin.
+    auth.default-role={{ .Values.configVars.auth.defaultRole }}
+
+    # Disable sign-up and sign-in using email/password
+    auth.method.email.disable={{ .Values.configVars.auth.method.email.disable }}
+
+    # Enable sign-up and sign-in using webauthn
+    auth.method.webauthn.enable={{ .Values.configVars.auth.method.webauthn.enable }}
+
+    # Enforce Multi-Factor Authentication for all users
+    auth.mfa.enforce={{ .Values.configVars.auth.mfa.enforce }}
+
+    # Disable self-service sign-up. Only admins will be able to add new users.
+    auth.selfservice.signup.disable={{ .Values.configVars.auth.selfservice.signup.disable }}
+
+    # Defines how long a session is active. Once that lifespan has been reached, the user needs to sign in again.
+    auth.session.lifespan={{ .Values.configVars.auth.session.lifespan }}
+
+    # Explicit address to advertise in cluster, e.g. 10.0.0.1. If not specified, CubeAPM will try to detect the address automatically.
+    cluster.advertise-address={{ .Values.cluster.advertise.address }}
+
+    # By default, CubeAPM only uses private IP address as the advertise address. Set this flag to true to allow public IP addresses to be used.
+    cluster.allow-insecure-advertise={{ .Values.cluster.advertise.allowInsecure }}
+
+    # Replication factor for the ingested data. Default is size_of_cluster/2 + 1
+    {{- if gt (int .Values.cluster.podCount) 1 }}
+    cluster.replication-factor={{ .Values.cluster.replicationFactor }}
+    {{- else }}
+    #cluster.replication-factor=
+    {{- end }}
+
+    # [Deprecated] Use env-tag instead.
+    #collector.env-tag=cube.environment
+
+    # Comma separated list of allowed headers for CORS requests.
+    # Examples: "Content-Type,tracestate,traceparent", "Content-Type,X-My-Custom-Header"
+    #collector.nr.cors.headers=Content-Type
+
+    # Comma separated list of allowed origins for CORS requests.
+    # Examples: "http://*.domain.com", "*"
+    #collector.nr.cors.origins=*
+
+    # Comma separated list of allowed origins for CORS requests.
+    # Examples: "http://*.domain.com", "*"
+    collector.otlp.http.cors.origins={{ .Values.collector.otlp.http.cors.origins }}
+
+    # Number of error traces to sample per sampling window (~5 minutes). The count is applied seperately for every service-api-error_type combination. Zero means dynamic sampling, which provides good performance while ensuring at least some samples of every kind of error are saved.
+    #collector.sampling.error-count=0
+
+    # Path to config file for transforming ingested spans before further processing.
+    {{- if .Values.collector.spanTransformsConfigFile }}
+    collector.span-transforms-config-file=/etc/cubeapm/span_transforms.yml
+    {{- else }}
+    #collector.span-transforms-config-file=
+    {{- end }}
+
+    # Update HTTP client span name as per called service's name and route.
+    #collector.span-transforms.enrich-http-client=false
+
+    # Host to bind admin http server on. Default is empty, which disables the admin http server. Set to 127.0.0.1 make the admin server accessible only from within the host, and to 0.0.0.0 to make it accessible from outside the host as well.
+    {{- if .Values.service.admin.enabled }}
+    http-host-admin=0.0.0.0
+    {{- else }}
+    #http-host-admin=
+    {{- end }}
+
+    # Port to bind admin http server on
+    http-port-admin={{ .Values.service.admin.port }}
+
+    # Token for authentication calls to admin http server. If specified, calls to admin http server will be required to carry the value as bearer token.
+    http-token-admin={{ .Values.service.admin.token }}
+
+    # Comma separated list of allowed headers for CORS requests for jsonline endpoint.
+    # Examples: "Content-Type,X-My-Custom-Header"
+    #logs.jsonline.cors.headers=Content-Type
+
+    # Comma separated list of allowed origins for CORS requests for jsonline endpoint.
+    # Examples: "http://*.domain.com", "*"
+    #logs.jsonline.cors.origins=*
+
+    # Custom field to record logs ingestion volume by. For example, if set to 'service', CubeAPM will look for the field named 'service' in incoming logs, and will maintain ingestion volume service-wise.
+    logs.metering.extra-field={{ .Values.configVars.logs.metering.extraField }}
+
+    # Access key for AWS CloudWatch integration via Amazon Data Firehose. If provided, CubeAPM will match the access key before accepting data from Amazon Data Firehose.
+    #metrics.aws.data-firehose-access-key=
+
+    # Path to config file for extending CubeAPM metrics with custom labels.
+    {{- if .Values.configVars.metrics.customLabelsConfigFile }}
+    metrics.custom-labels-config-file=/etc/cubeapm/metrics.yml
+    {{- else }}
+    #metrics.custom-labels-config-file=
+    {{- end }}
+
+    # Operation mode for downsampler. Downsampler periodically creates compressed copies of apm metrics. This speeds up apm queries over longer time ranges.
+    # Possible values are off, on, backfill-YYYY-MM-DD
+    #metrics.downsampler.mode=on
+
+    # Whether to enable infrastructure correlation.
+    #metrics.infra-correlation.enable=false
+
+    # Compatibility mode for integration using New Relic agent.
+    # Possible values are legacy, modern
+    metrics.nr.compatibility-mode={{ .Values.configVars.metrics.newrelic.compatibilityMode }}
+
+    # Whether to forward data received from New Relic agent to New Relic as well.
+    #metrics.nr.forwarder.enable=false
+
+    # Whether to perfer HTTP status code description as error description in the reported metrics. By default, exception name is preferred and HTTP status code description is used if no exception occured.
+    #metrics.prefer-http-status-as-error-desc=false
+
+    # Path to config file for SLOs (Service Level Objectives).
+    {{- if .Values.configVars.metrics.slo.configFile }}
+    metrics.slo.config-file=/etc/cubeapm/slo.yml
+    {{- else }}
+    #metrics.slo.config-file=
+    {{- end }}
+
+    # Whether to treat HTTP 4xx response as error in the reported metrics.
+    #metrics.treat-4xx-as-error=false
+
+    # Metrics update interval. Must be between 5s and 1m.
+    metrics.update-interval={{ .Values.configVars.metrics.updateInterval }}
+
+    # Replication factor assumed while querying.
+    #query.replication-factor=1
+
+    # Delay before shutdown. During this delay, health check returns non-OK responses so load balancers can route new requests to other servers.
+    shutdown-delay={{ .Values.configVars.shutdownDelay }}
+
+    # Path to config file for creating custom indexes on traces.
+    {{- if .Values.configVars.traces.customIndexesConfigFile }}
+    traces.custom-indexes-config-file=/etc/cubeapm/traces.yml
+    {{- else }}
+    #traces.custom-indexes-config-file=
+    {{- end }}
+
+
+
+    ## End of CubeAPM configuration file
