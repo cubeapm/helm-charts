@@ -15,7 +15,7 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $fullName | trunc 48 | trimSuffix "-" }}-query
+  name: {{ $fullName | trunc 57 | trimSuffix "-" }}-query
   labels:
     {{- include "cubeapm.labels" . | nindent 4 }}
   {{- with .Values.ingressQuery.annotations }}
