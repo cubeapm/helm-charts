@@ -417,6 +417,22 @@ ingressAdmin:
   # -- CubeAPM Ingress TLS
   tls: []
 
+ingressQuery:
+    # -- Enable query ingress for CubeAPM
+    enabled: false
+    # -- Ingress Class Name to be used to identify ingress controllers
+    className: ""
+    # -- Annotations to the ingress
+    annotations: {}
+    # -- Ingress Host names with their path details
+    hosts:
+      - host: cubeapm-metrics.yourdomain.com
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    # -- Ingress TLS
+    tls: []
+
 # https://github.com/kubernetes-sigs/aws-load-balancer-controller
 # It satisfies Kubernetes Ingress resources by provisioning Application Load Balancers.
 # It satisfies Kubernetes Service resources by provisioning Network Load Balancers.
