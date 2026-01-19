@@ -570,6 +570,20 @@ persistence:
   # -- Persistent Volume size
   size: 100Gi
 
+juicefs:
+  # -- Enable data archive using PVC.
+  enabled: true
+  # -- Name of an existing PVC to use
+  existingClaim: "cubeapm-logs-archive-pvc"
+  # -- Archive Volume Storage Class to use.
+  # If defined, `storageClassName: <storageClass>`.
+  storageClass: cubeapm-logs-archive-sc
+  # -- Access Modes for persistent volume
+  accessModes:
+    - ReadWriteMany
+  # -- Persistent Volume size
+  size: 10Gi
+
 collector:
   otlp:
     grpc:
