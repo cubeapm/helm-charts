@@ -61,7 +61,7 @@ resources:
 image:
   registry: docker.io
   repository: cubeapm/cubeapm
-  tag: v1.13.0
+  tag: v1.14.0
   pullPolicy: IfNotPresent
 
 configVars:
@@ -265,7 +265,7 @@ configVars:
       ignoreFields: ""
     newrelic:
       # -- Comma separated list of New Relic tags to be used as stream fields.
-      streamFields: "service.name,faas.name"
+      streamFields: "service.name,faas.name,appId,level"
       # -- Comma separated list of New Relic tags to ignore.
       ignoreFields: ""
 
@@ -327,7 +327,6 @@ configVars:
         #     env: UNSET
         # metrics:
         #   - cloudsql.googleapis.com/database/cpu/utilization
-
 
   tracegen:
     # -- Disable the built-in demo trace generator
@@ -401,6 +400,26 @@ ingress:
   # -- CubeAPM Ingress TLS
   tls: []
 
+ingressQuery:
+  # -- Enable ingress for fetching data via CubeAPM APIs from outside of k8s
+  # over HTTP. Clients can either use
+  # <cubeapm_service_name>.<namespace>.svc.cluster.local:3140 as the endpoint
+  # (in which case this ingress is not needed) or they can use the host:port
+  # configured in this ingress.
+  enabled: false
+  # -- Ingress Class Name to be used to identify ingress controllers
+  className: ""
+  # -- Annotations to the ingress
+  annotations: {}
+  # -- Ingress Host names with their path details
+  hosts:
+    - host: cubeapm-query.yourdomain.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  # -- Ingress TLS
+  tls: []
+
 ingressAdmin:
   # -- Enable admin ingress for CubeAPM
   enabled: false
@@ -415,22 +434,6 @@ ingressAdmin:
         - path: /
           pathType: ImplementationSpecific
   # -- CubeAPM Ingress TLS
-  tls: []
-
-ingressQuery:
-  # -- Enable query ingress for CubeAPM
-  enabled: false
-  # -- Ingress Class Name to be used to identify ingress controllers
-  className: ""
-  # -- Annotations to the ingress
-  annotations: {}
-  # -- Ingress Host names with their path details
-  hosts:
-    - host: cubeapm-query.yourdomain.com
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  # -- Ingress TLS
   tls: []
 
 # https://github.com/kubernetes-sigs/aws-load-balancer-controller
@@ -586,6 +589,11 @@ collector:
         # -- Comma separated list of allowed origins for CORS requests.
         # Examples: "http://*.domain.com", "*"
         origins: ""
+  nr:
+    # -- Collect data that New Relic stores in Transaction table
+    collectTransactionData: false
+    # -- Do not deny service to unsupported agent protocols. Provide best-effort service instead.
+    skipProtocolCheck: false
   nr8t:
     # -- Disable New Relic Infinite Tracing grpc receiver
     disable: false

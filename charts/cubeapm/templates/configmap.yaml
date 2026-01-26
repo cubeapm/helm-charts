@@ -416,8 +416,15 @@ data:
     #cluster.replication-factor=
     {{- end }}
 
+    # Elastic APM server URL to forward requests to when forwarding is enabled.
+    # Example: https://apm-server.example.com:8200
+    #collector.elastic.server-url=
+
     # [Deprecated] Use env-tag instead.
     #collector.env-tag=cube.environment
+
+    # Collect data that New Relic stores in Transaction table.
+    collector.nr.collect-transaction-data={{ .Values.collector.nr.collectTransactionData }}
 
     # Comma separated list of allowed headers for CORS requests.
     # Examples: "Content-Type,tracestate,traceparent", "Content-Type,X-My-Custom-Header"
@@ -426,6 +433,9 @@ data:
     # Comma separated list of allowed origins for CORS requests.
     # Examples: "http://*.domain.com", "*"
     #collector.nr.cors.origins=*
+
+    # Do not deny service to unsupported agent protocols. Provide best-effort service instead.
+    collector.nr.skip-protocol-check={{ .Values.collector.nr.skipProtocolCheck }}
 
     # Comma separated list of allowed origins for CORS requests.
     # Examples: "http://*.domain.com", "*"
@@ -457,14 +467,6 @@ data:
     # Token for authentication calls to admin http server. If specified, calls to admin http server will be required to carry the value as bearer token.
     http-token-admin={{ .Values.service.admin.token }}
 
-    # Comma separated list of allowed headers for CORS requests for jsonline endpoint.
-    # Examples: "Content-Type,X-My-Custom-Header"
-    #logs.jsonline.cors.headers=Content-Type
-
-    # Comma separated list of allowed origins for CORS requests for jsonline endpoint.
-    # Examples: "http://*.domain.com", "*"
-    #logs.jsonline.cors.origins=*
-
     # Custom field to record logs ingestion volume by. For example, if set to 'service', CubeAPM will look for the field named 'service' in incoming logs, and will maintain ingestion volume service-wise.
     logs.metering.extra-field={{ .Values.configVars.logs.metering.extraField }}
 
@@ -477,6 +479,10 @@ data:
     {{- else }}
     #metrics.custom-labels-config-file=
     {{- end }}
+
+    # Compatibility mode for integration using Datadog agent.
+    # Possible values are legacy, modern
+    #metrics.dd.compatibility-mode=modern
 
     # Operation mode for downsampler. Downsampler periodically creates compressed copies of apm metrics. This speeds up apm queries over longer time ranges.
     # Possible values are off, on, backfill-YYYY-MM-DD
