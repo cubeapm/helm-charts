@@ -572,7 +572,7 @@ persistence:
 
 archivelogs:
   # -- Enable data archive using PVC.
-  enabled: true
+  enabled: false
   # -- Name of an existing PVC to use
   existingClaim: "cubeapm-logs-archive-pvc"
   # -- Archive Volume Storage Class to use.
