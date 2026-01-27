@@ -134,6 +134,10 @@ spec:
             - name: cubeapm-data-volume
           {{- end }}
               mountPath: /var/lib/cubeapm/data
+          {{- if .Values.archivelogs.enabled }}
+            - name: archivelogs-dir
+              mountPath: /var/lib/cubeapm/archive
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
@@ -147,6 +151,11 @@ spec:
         - name: cubeapm-data-existing-claim
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim }}
+      {{- end }}
+      {{- if .Values.archivelogs.enabled }}
+        - name: archivelogs-dir
+          persistentVolumeClaim:
+            claimName: {{ .Values.archivelogs.existingClaim }}
       {{- end }}
 
 {{- if and (.Values.persistence.enabled) (not .Values.persistence.existingClaim) }}
