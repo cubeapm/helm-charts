@@ -570,7 +570,7 @@ persistence:
   # -- Persistent Volume size
   size: 100Gi
 
-juicefs:
+archivelogs:
   # -- Enable data archive using PVC.
   enabled: true
   # -- Name of an existing PVC to use
