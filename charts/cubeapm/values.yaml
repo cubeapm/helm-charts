@@ -640,3 +640,22 @@ cluster:
     # -- Port to use for internal exchange of data between nodes
     # for maintaining cluster state
     state: 3129
+
+extraYamls: []
+# extraYamls:
+#   - apiVersion: v1
+#     kind: ConfigMap
+#     metadata:
+#       name: cubeapm-config
+#       namespace: default
+#     data:
+#       my-config-file.yaml: |
+#         key: value
+#   - apiVersion: v1
+#     kind: Secret
+#     metadata:
+#       name: dotfile-secret
+#     type: kubernetes.io/basic-auth
+#     stringData:
+#       username: admin
+#       password: t0p-Secret
