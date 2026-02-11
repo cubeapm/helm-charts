@@ -641,8 +641,8 @@ cluster:
     # for maintaining cluster state
     state: 3129
 
-extraYamls: []
-# extraYamls:
+extraManifests: []
+# extraManifests:
 #   - apiVersion: v1
 #     kind: ConfigMap
 #     metadata:

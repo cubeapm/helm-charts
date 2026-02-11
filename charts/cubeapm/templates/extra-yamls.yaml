@@ -1,4 +1,0 @@
-{{- range .Values.extraYamls }}
----
-{{ toYaml . }}
-{{- end -}}
