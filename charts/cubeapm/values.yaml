@@ -290,6 +290,9 @@ configVars:
       # -- Compatibility mode for integration using New Relic agent.
       # Possible values are legacy, modern.
       compatibilityMode: legacy
+      # -- Whether to forward data received from New Relic agent to New Relic as well.
+      # Possible values are true or false.
+      enableForwarder: false
     slo:
       # -- Config for SLOs (Service Level Objectives).
       # Set `configFile: null` to disable SLOs if desired.

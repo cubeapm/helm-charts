@@ -496,7 +496,7 @@ data:
     metrics.nr.compatibility-mode={{ .Values.configVars.metrics.newrelic.compatibilityMode }}
 
     # Whether to forward data received from New Relic agent to New Relic as well.
-    #metrics.nr.forwarder.enable=false
+    metrics.nr.forwarder.enable={{ .Values.configVars.metrics.newrelic.enableForwarder }}
 
     # Whether to perfer HTTP status code description as error description in the reported metrics. By default, exception name is preferred and HTTP status code description is used if no exception occured.
     #metrics.prefer-http-status-as-error-desc=false
