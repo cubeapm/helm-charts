@@ -136,7 +136,7 @@ spec:
               mountPath: /var/lib/cubeapm/data
           {{- if .Values.archivelogs.enabled }}
             - name: archivelogs-dir
-              mountPath: /var/lib/cubeapm/archive
+              mountPath: /var/lib/cubeapm/logs_archive
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

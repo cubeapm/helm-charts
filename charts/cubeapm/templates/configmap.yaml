@@ -164,7 +164,13 @@ data:
 
     # Where to put the backup on the remote storage.
     # Example: s3://bucket/path/to/backup, gs://bucket/path/to/backup, azblob://container/path/to/backup or fs:///path/to/local/backup/dir
+    {{- if .Values.configVars.logs.backup.destination }}
     logs.backup.destination={{ .Values.configVars.logs.backup.destination }}
+    {{- else if .Values.archivelogs.enabled }}
+    logs.backup.destination=fs:///var/lib/cubeapm/logs_archive
+    {{- else }}
+    #logs.backup.destination=
+    {{- end }}
 
     # Path to file with S3 configs. Configs are loaded from default location if not set.
     # See https://docs.aws.amazon.com/credref/latest/refdocs/file-location.html#file-location.
@@ -216,6 +222,13 @@ data:
 
     # Logs retention period. Must be at least 24h.
     logs.retention={{ .Values.configVars.logs.retention }}
+
+    # Directory to store archived logs.
+    {{- if .Values.archivelogs.enabled }}
+    logs.archive.dir=/var/lib/cubeapm/logs_archive
+    {{- else }}
+    #logs.archive.dir=
+    {{- end }}
 
     # Metrics retention period. Must be at least 24h.
     metrics.retention={{ .Values.configVars.metrics.retention }}
