@@ -145,15 +145,15 @@ configVars:
       # receivers:
       #   - name: my receiver group
       #     email_configs:
-      #       - to: someone@yourdomain.com
+      #       - to: user@cubeapm.com
       # mutes:
-      #   - name: workhours
+      #   - name: weekend night hours
       #     time_intervals:
-      #       - weekdays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+      #       - weekdays: ['saturday', 'sunday']
       #         times:
-      #           - start_time: '09:00'
-      #             duration_minutes: 60
-      #         location: Asia/Calcutta
+      #           - start_time: '22:00'
+      #             duration_minutes: 480
+      #         location: America/New_York
       # alerts:
       #   - status: ACTIVE
       #     datasource: prometheus
@@ -170,12 +170,20 @@ configVars:
       #     grouping_disable: false
       #     receiver_names:
       #       - my receiver group
-      #     mute_names:
-      #       - workhours
       #     receiver:
       #       name: '101'
       #       email_configs:
-      #         - to: someone@yourdomain.com
+      #         - to: user@cubeapm.com
+      #     mute_names:
+      #       - weekend night hours
+      #     mute:
+      #       name: night_hours
+      #       time_intervals:
+      #         - times:
+      #             - start_time: '23:00'
+      #               duration_minutes: 240
+      #           location: America/New_York
+
 
   auth:
     database:
