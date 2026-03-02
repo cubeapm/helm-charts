@@ -255,6 +255,19 @@ configVars:
         # -- The Storage Class applied to objects uploaded to AWS S3. Supported values are: GLACIER, DEEP_ARCHIVE, GLACIER_IR, INTELLIGENT_TIERING, ONEZONE_IA, OUTPOSTS, REDUCED_REDUNDANCY, STANDARD, STANDARD_IA.
         # See https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html.
         storageClass: ""
+    archive:
+      # -- Enable data archive using PVC.
+      enabled: false
+      # -- Name of an existing PVC to use
+      existingClaim: "cubeapm-logs-archive-pvc"
+      # -- Archive Volume Storage Class to use.
+      # If defined, `storageClassName: <storageClass>`.
+      storageClass: cubeapm-logs-archive-sc
+      # -- Access Modes for persistent volume
+      accessModes:
+        - ReadWriteMany
+      # -- Notional Persistent Volume size
+      size: 10Gi
     metering:
       # -- Custom field to record logs ingestion volume by. For example, if set to 'service', CubeAPM will look for the field named 'service' in incoming logs, and will maintain ingestion volume service-wise.
       extraField: ""
@@ -569,20 +582,6 @@ persistence:
     - ReadWriteOnce
   # -- Persistent Volume size
   size: 100Gi
-
-archivelogs:
-  # -- Enable data archive using PVC.
-  enabled: false
-  # -- Name of an existing PVC to use
-  existingClaim: "cubeapm-logs-archive-pvc"
-  # -- Archive Volume Storage Class to use.
-  # If defined, `storageClassName: <storageClass>`.
-  storageClass: cubeapm-logs-archive-sc
-  # -- Access Modes for persistent volume
-  accessModes:
-    - ReadWriteMany
-  # -- Persistent Volume size
-  size: 10Gi
 
 collector:
   otlp:

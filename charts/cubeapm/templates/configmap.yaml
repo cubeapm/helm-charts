@@ -166,7 +166,7 @@ data:
     # Example: s3://bucket/path/to/backup, gs://bucket/path/to/backup, azblob://container/path/to/backup or fs:///path/to/local/backup/dir
     {{- if .Values.configVars.logs.backup.destination }}
     logs.backup.destination={{ .Values.configVars.logs.backup.destination }}
-    {{- else if .Values.archivelogs.enabled }}
+    {{- else if .Values.configVars.archive.enabled }}
     logs.backup.destination=fs:///var/lib/cubeapm/logs_archive
     {{- else }}
     #logs.backup.destination=
@@ -224,7 +224,7 @@ data:
     logs.retention={{ .Values.configVars.logs.retention }}
 
     # Directory to store archived logs.
-    {{- if .Values.archivelogs.enabled }}
+    {{- if .Values.configVars.archive.enabled }}
     logs.archive.dir=/var/lib/cubeapm/logs_archive
     {{- else }}
     #logs.archive.dir=
