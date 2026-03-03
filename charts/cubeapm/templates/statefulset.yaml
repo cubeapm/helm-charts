@@ -158,7 +158,7 @@ spec:
             {{- if .Values.configVars.logs.archive.existingClaim }}
             claimName: {{ .Values.configVars.logs.archive.existingClaim }}
             {{- else }}
-            claimName: {{ include "cubeapm.fullname" . }}-logs-archive
+            claimName: {{ include "cubeapm.fullname" . | trunc 50 | trimSuffix "-" }}-logs-archive
             {{- end }}
       {{- end }}
 

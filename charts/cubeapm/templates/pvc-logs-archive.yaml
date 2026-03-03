@@ -2,10 +2,10 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "cubeapm.fullname" . }}-logs-archive
+  name: {{ include "cubeapm.fullname" . | trunc 50 | trimSuffix "-" }}-logs-archive
   labels:
     {{- include "cubeapm.labels" . | nindent 4 }}
-    cache-on-pvc: "true"
+    cubeapm-logs-archive-cache: "true"
 spec:
   accessModes:
     {{- toYaml .Values.configVars.logs.archive.accessModes | nindent 4 }}
@@ -21,4 +21,3 @@ spec:
   {{- end }}
   {{- end }}
 {{- end }}
-
