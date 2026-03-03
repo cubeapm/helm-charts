@@ -258,9 +258,7 @@ configVars:
     archive:
       # -- Enable data archive using PVC.
       enabled: false
-      # -- Name of an existing PVC to use
-      existingClaim: "cubeapm-logs-archive-pvc"
-      # -- Archive Volume Storage Class to use.
+      # -- Archive Volume Storage Class to use when creating the PVC.
       # If defined, `storageClassName: <storageClass>`.
       storageClass: cubeapm-logs-archive-sc
       # -- Access Modes for persistent volume
