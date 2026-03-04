@@ -256,10 +256,12 @@ configVars:
         # See https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html.
         storageClass: ""
     archive:
-      # -- Enable data archive using PVC.
+      # -- Enable data archive using object store like S3 / GCS / Blob Store.
+      # Archived data is available for real-time querying.
       enabled: false
+      # -- Name of an existing PVC to use
+      existingClaim: ""
       # -- Archive Volume Storage Class to use when creating the PVC.
-      # If defined, `storageClassName: <storageClass>`.
       storageClass: cubeapm-logs-archive-sc
       # -- Access Modes for persistent volume
       accessModes:
@@ -338,7 +340,6 @@ configVars:
         #     env: UNSET
         # metrics:
         #   - cloudsql.googleapis.com/database/cpu/utilization
-
 
   tracegen:
     # -- Disable the built-in demo trace generator
