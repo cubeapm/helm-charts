@@ -217,6 +217,13 @@ data:
     # Logs retention period. Must be at least 24h.
     logs.retention={{ .Values.configVars.logs.retention }}
 
+    # Directory to store archived logs.
+    {{- if .Values.configVars.logs.archive.enabled }}
+    logs.archive.dir=/var/lib/cubeapm/logs_archive
+    {{- else }}
+    #logs.archive.dir=
+    {{- end }}
+
     # Metrics retention period. Must be at least 24h.
     metrics.retention={{ .Values.configVars.metrics.retention }}
 
