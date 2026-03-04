@@ -1,0 +1,23 @@
+{{- if and .Values.configVars.logs.archive.enabled (not .Values.configVars.logs.archive.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "cubeapm.fullname" . | trunc 50 | trimSuffix "-" }}-logs-archive
+  labels:
+    {{- include "cubeapm.labels" . | nindent 4 }}
+    cubeapm-logs-archive-cache: "true"
+spec:
+  accessModes:
+    {{- toYaml .Values.configVars.logs.archive.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.configVars.logs.archive.size }}
+  {{- $storageClass := .Values.configVars.logs.archive.storageClass }}
+  {{- if $storageClass }}
+  {{- if (eq "-" $storageClass) }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ $storageClass }}
+  {{- end }}
+  {{- end }}
+{{- end }}
