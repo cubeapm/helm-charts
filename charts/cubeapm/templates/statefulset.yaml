@@ -122,6 +122,9 @@ spec:
               path: /health
               port: http
           volumeMounts:
+          {{- if .Values.extraVolumeMounts }}
+          {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 12 }}
+          {{- end }}
             - name: config
               mountPath: /etc/cubeapm
           {{- if .Values.persistence.enabled }}
@@ -141,6 +144,9 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
+      {{- if .Values.extraVolumes }}
+      {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
+      {{- end }}
         - name: config
           configMap:
             name: {{ include "cubeapm.fullname" . }}
