@@ -11,6 +11,10 @@ data:
   metrics.yml: |
     {{- toYaml .Values.configVars.metrics.customLabelsConfigFile | nindent 4 }}
   {{- end }}
+  {{- if .Values.configVars.retention.configFile }}
+  retention.yml: |
+    {{- toYaml .Values.configVars.retention.configFile | nindent 4 }}
+  {{- end }}
   {{- if .Values.configVars.traces.customIndexesConfigFile }}
   traces.yml: |
     {{- toYaml .Values.configVars.traces.customIndexesConfigFile | nindent 4 }}
@@ -523,6 +527,13 @@ data:
 
     # Replication factor assumed while querying.
     #query.replication-factor=1
+
+    # Path to config file for retention policies.
+    {{- if .Values.configVars.retention.configFile }}
+    retention.config-file=/etc/cubeapm/retention.yml
+    {{- else }}
+    #retention.config-file=
+    {{- end }}
 
     # Delay before shutdown. During this delay, health check returns non-OK responses so load balancers can route new requests to other servers.
     shutdown-delay={{ .Values.configVars.shutdownDelay }}

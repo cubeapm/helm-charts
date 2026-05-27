@@ -382,6 +382,19 @@ configVars:
     #       - label: http.status_code
     #         match: '4\d{2}'
 
+  retention:
+    # -- Config for retention policies.
+    # See `values.yaml` for an example.
+    configFile: {}
+    # logs:
+    #   - streams:
+    #       log.level: info
+    #     retention: 48h
+    #   - streams:
+    #       service: search
+    #       log.level: info
+    #     retention: 24h
+
 # -- Environment variables to be passed to CubeAPM containers.
 # Example:
 #   - name: ENV_VARIABLE_NAME
