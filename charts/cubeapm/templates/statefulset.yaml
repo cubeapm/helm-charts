@@ -124,6 +124,16 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /etc/cubeapm
+          {{- if .Values.configVars.alertmanager.googlechat.credentialsExistingSecret }}
+            - name: googlechat-credentials
+              mountPath: /etc/cubeapm-secrets/googlechat
+              readOnly: true
+          {{- end }}
+          {{- if .Values.configVars.metrics.gcp.applicationCredentialsExistingSecret }}
+            - name: gcp-credentials
+              mountPath: /etc/cubeapm-secrets/gcp
+              readOnly: true
+          {{- end }}
           {{- if .Values.persistence.enabled }}
           {{- if .Values.persistence.existingClaim }}
             - name: cubeapm-data-existing-claim
@@ -144,6 +154,22 @@ spec:
         - name: config
           configMap:
             name: {{ include "cubeapm.fullname" . }}
+      {{- if .Values.configVars.alertmanager.googlechat.credentialsExistingSecret }}
+        - name: googlechat-credentials
+          secret:
+            secretName: {{ .Values.configVars.alertmanager.googlechat.credentialsExistingSecret }}
+            items:
+              - key: googlechat_credentials.json
+                path: googlechat_credentials.json
+      {{- end }}
+      {{- if .Values.configVars.metrics.gcp.applicationCredentialsExistingSecret }}
+        - name: gcp-credentials
+          secret:
+            secretName: {{ .Values.configVars.metrics.gcp.applicationCredentialsExistingSecret }}
+            items:
+              - key: gcp_credentials.json
+                path: gcp_credentials.json
+      {{- end }}
       {{- if (not .Values.persistence.enabled) }}
         - name: cubeapm-data-volume
           emptyDir: {}

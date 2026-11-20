@@ -61,7 +61,7 @@ resources:
 image:
   registry: docker.io
   repository: cubeapm/cubeapm
-  tag: v1.14.0
+  tag: v1.15.0
   pullPolicy: IfNotPresent
 
 configVars:
@@ -107,9 +107,23 @@ configVars:
   token: ""
 
   alertmanager:
+    alertLogs:
+      # -- Retention period for alert notification history (alert_logs table). Must be at least 24h.
+      retention: 720h
     charts:
       # -- Disable charts in alert notifications
       disable: false
+    googlechat:
+      # -- Enable the Google Chat app, for choosing spaces and people to mention in Google Chat alert notifications.
+      # Credentials are read from credentialsExistingSecret if set, else from Application Default Credentials.
+      # See https://cloud.google.com/docs/authentication/application-default-credentials
+      appEnabled: false
+      # -- Name of an existing k8s Secret containing credentials json of the service account of a Google Chat app
+      # under the key `googlechat_credentials.json`. Used only if appEnabled is set.
+      # Accepts a service account key, an impersonated service account or a workload identity federation config.
+      # See https://developers.google.com/workspace/chat/authenticate-authorize-chat-app
+      # Example: kubectl create secret generic cubeapm-googlechat --from-file=googlechat_credentials.json=./key.json
+      credentialsExistingSecret: ""
     jira:
       # -- Name of the site for sending alert notifications on Jira.
       # If you access Jira on https://youraccountid.atlassian.net, the site name is youraccountid.
@@ -137,6 +151,9 @@ configVars:
       # Format: team1:token1,team2:token2,...,teamN:tokenN
       # Alternatively, set CUBE_ALERTMANAGER_OPSGENIE_TOKENS environment variable in extraEnvs section to use k8s secret.
       tokens: ""
+    sampleLog:
+      # -- Disable sample log in alert notifications
+      disable: false
 
   alerts:
     # -- Config for alerts.
@@ -184,7 +201,6 @@ configVars:
       #               duration_minutes: 240
       #           location: America/New_York
 
-
   auth:
     database:
       # -- [Required] URL of database for storing user accounts data
@@ -224,6 +240,15 @@ configVars:
         # -- Client secret for Sign in with Google
         # Alternatively, set CUBE_AUTH_OIDC_GOOGLE_CLIENT_SECRET environment variable in extraEnvs section to use k8s secret.
         clientSecret: ""
+      jumpcloud:
+        # -- Client ID for Sign in with JumpCloud.
+        # Refer https://docs.cubeapm.com/configure/single-sign-on/sign-in-with-jumpcloud for guidance.
+        clientId: ""
+        # -- Client secret for Sign in with JumpCloud
+        # Alternatively, set CUBE_AUTH_OIDC_JUMPCLOUD_CLIENT_SECRET environment variable in extraEnvs section to use k8s secret.
+        clientSecret: ""
+        # -- Issuer URL for JumpCloud OIDC
+        issuerUrl: ""
       microsoft:
         # -- Client ID for Sign in with Microsoft.
         # Refer https://docs.cubeapm.com/configure/single-sign-on/sign-in-with-microsoft for guidance.
@@ -241,6 +266,15 @@ configVars:
         # Alternatively, set CUBE_AUTH_OIDC_ONELOGIN_CLIENT_SECRET environment variable in extraEnvs section to use k8s secret.
         clientSecret: ""
         # -- Issuer URL for OneLogin OIDC
+        issuerUrl: ""
+      pingidentity:
+        # -- Client ID for Sign in with PingIdentity.
+        # Refer https://docs.cubeapm.com/configure/single-sign-on/sign-in-with-pingidentity for guidance.
+        clientId: ""
+        # -- Client secret for Sign in with PingIdentity
+        # Alternatively, set CUBE_AUTH_OIDC_PINGIDENTITY_CLIENT_SECRET environment variable in extraEnvs section to use k8s secret.
+        clientSecret: ""
+        # -- Issuer URL for PingIdentity OIDC
         issuerUrl: ""
     selfservice:
       signup:
@@ -289,6 +323,8 @@ configVars:
         - ReadWriteMany
       # -- Notional Persistent Volume size
       size: 10Gi
+      # -- Logs archive retention period. Must be at least 48h.
+      retention: 2160h
     metering:
       # -- Custom field to record logs ingestion volume by. For example, if set to 'service', CubeAPM will look for the field named 'service' in incoming logs, and will maintain ingestion volume service-wise.
       extraField: ""
@@ -320,39 +356,27 @@ configVars:
       #       tag: http.status_code
       #       match: '(\d)\d{2}'
       #       replace: '${1}xx'
-    newrelic:
-      # -- Compatibility mode for integration using New Relic agent.
+    datadog:
+      # -- Compatibility mode for integration using Datadog agent.
       # Possible values are legacy, modern.
       compatibilityMode: legacy
-    slo:
-      # -- Config for SLOs (Service Level Objectives).
-      # Set `configFile: null` to disable SLOs if desired.
-      configFile:
-        slos:
-          # default for all services
-          default:
-            error_budget_percent: 0.5
-            latency_threshold: 100ms
-            latency_budget_percent: 5
-
-          # overrides for specific environments
-          # default_envs:
-          #   - env: UNSET
-          #     latency_threshold: 75ms
-          #     latency_budget_percent: 1
-          #   - env: UNSET
-          #     error_budget_percent: 0.1
-
-          # overrides for specific services
-          # default_services:
-          #   - env: UNSET
-          #     service: order-service
-          #     latency_threshold: 75ms
-          #     latency_budget_percent: 1
-          #   - env: UNSET
-          #     service: payment-service
-          #     error_budget_percent: 0.1
+    newrelic:
+      # -- Compatibility mode for integration using New Relic agent.
+      # Possible values are legacy, v2, modern.
+      compatibilityMode: v2
+      forwarder:
+        # -- Whether to forward data received from New Relic agent to New Relic as well.
+        enable: false
+        # -- Comma-separated list of services to forward to New Relic when forwarder is enabled.
+        # Each entry is service[;env[;accountID]] - env defaults to UNSET, and an entry without accountID matches the service in every account.
+        # Empty forwards all services.
+        services: ""
     gcp:
+      # -- Name of an existing k8s Secret containing credentials json for Google Cloud Platform
+      # under the key `gcp_credentials.json`.
+      # See https://cloud.google.com/docs/authentication/application-default-credentials
+      # Example: kubectl create secret generic cubeapm-gcp --from-file=gcp_credentials.json=./key.json
+      applicationCredentialsExistingSecret: ""
       # -- Google Cloud Platform metrics list
       configFile: {}
         # collection_interval: 60s
@@ -361,6 +385,15 @@ configVars:
         #     env: UNSET
         # metrics:
         #   - cloudsql.googleapis.com/database/cpu/utilization
+
+  profiles:
+    # -- Profiles retention period. Must be at least 24h.
+    retention: 168h
+
+  slo:
+    # -- Retention period for SLO data (slo_data and uptime_data tables).
+    # Days older than this disappear from the SLO Data page. Must be at least 168h.
+    dataRetention: 4320h
 
   tracegen:
     # -- Disable the built-in demo trace generator
@@ -387,12 +420,9 @@ configVars:
     # See `values.yaml` for an example.
     configFile: {}
     # logs:
-    #   - streams:
-    #       log.level: info
+    #   - streams: '{log.level="info"}'
     #     retention: 48h
-    #   - streams:
-    #       service: search
-    #       log.level: info
+    #   - streams: '{service="search",log.level="info"}'
     #     retention: 24h
 
 # -- Environment variables to be passed to CubeAPM containers.
@@ -637,8 +667,20 @@ collector:
         # Examples: "http://*.domain.com", "*"
         origins: ""
   nr:
+    bam:
+      forward:
+        # -- New Relic Browser Application Monitoring host to additionally forward data to, e.g., bam.nr-data.net
+        host: ""
+      map:
+        # -- Comma-separated list of browser app id to app name mappings. Each entry is applicationID=service[;env]
+        appIds: ""
     # -- Collect data that New Relic stores in Transaction table
     collectTransactionData: false
+    # -- Disable logs forwarding in New Relic agents.
+    logsForwardingDisable: false
+    # -- Do not save metrics sent by New Relic agents by default.
+    # Only select metrics will be saved if set to true, and all metrics will be saved if set to false.
+    skipMetrics: false
     # -- Do not deny service to unsupported agent protocols. Provide best-effort service instead.
     skipProtocolCheck: false
   nr8t:
@@ -646,6 +688,9 @@ collector:
     disable: false
     # -- Port to bind New Relic Infinite Tracing grpc receiver on
     port: 3124
+  sampling:
+    # -- Whether to disable sampling, i.e., save all traces.
+    disable: false
   # -- Config for transforming ingested spans before further processing.
   # See `values.yaml` for an example.
   spanTransformsConfigFile: {}
