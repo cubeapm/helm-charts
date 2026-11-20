@@ -19,10 +19,6 @@ data:
   traces.yml: |
     {{- toYaml .Values.configVars.traces.customIndexesConfigFile | nindent 4 }}
   {{- end }}
-  {{- if .Values.configVars.metrics.slo.configFile }}
-  slo.yml: |
-    {{- toYaml .Values.configVars.metrics.slo.configFile | nindent 4 }}
-  {{- end }}
   {{- if .Values.configVars.metrics.gcp.configFile }}
   gcp_metrics.yml: |
     {{- toYaml .Values.configVars.metrics.gcp.configFile | nindent 4 }}
@@ -54,7 +50,7 @@ data:
     # Examples: http://cube.yourdomain.com, https://yourdomain.com/cube, http://10.0.0.1:3125
     base-url={{ .Values.configVars.baseUrl }}
 
-    # Comma separated list of email ids of users to be given sysadmin privilege.
+    # Comma separated list of email ids of users to be given sysadmin privilege. Only sysadmins can manage users and accounts.
     auth.sys-admins={{ .Values.configVars.auth.sysAdmins }}
 
     # Comma separated list of all nodes in the cluster, e.g., 10.0.0.1,10.0.0.2,10.0.0.3. Leave empty for single node operation.
@@ -103,6 +99,15 @@ data:
     # Client secret for Sign in with Google
     auth.oidc.google.client-secret={{ .Values.configVars.auth.oidc.google.clientSecret }}
 
+    # Client ID for Sign in with JumpCloud
+    auth.oidc.jumpcloud.client-id={{ .Values.configVars.auth.oidc.jumpcloud.clientId }}
+
+    # Client secret for Sign in with JumpCloud
+    auth.oidc.jumpcloud.client-secret={{ .Values.configVars.auth.oidc.jumpcloud.clientSecret }}
+
+    # Issuer URL for JumpCloud OIDC
+    auth.oidc.jumpcloud.issuer-url={{ .Values.configVars.auth.oidc.jumpcloud.issuerUrl }}
+
     # Client ID for Sign in with Microsoft
     auth.oidc.microsoft.client-id={{ .Values.configVars.auth.oidc.microsoft.clientId }}
 
@@ -121,11 +126,34 @@ data:
     # Issuer URL for OneLogin OIDC
     auth.oidc.onelogin.issuer-url={{ .Values.configVars.auth.oidc.onelogin.issuerUrl }}
 
+    # Client ID for Sign in with PingIdentity
+    auth.oidc.pingidentity.client-id={{ .Values.configVars.auth.oidc.pingidentity.clientId }}
+
+    # Client secret for Sign in with PingIdentity
+    auth.oidc.pingidentity.client-secret={{ .Values.configVars.auth.oidc.pingidentity.clientSecret }}
+
+    # Issuer URL for PingIdentity OIDC
+    auth.oidc.pingidentity.issuer-url={{ .Values.configVars.auth.oidc.pingidentity.issuerUrl }}
+
     # App ID for sending alert notifications on PagerDuty.
     alertmanager.oauth.pagerduty.app-id={{ .Values.configVars.alertmanager.oauth.pagerduty.appId }}
 
     # Bot user OAuth token for sending alert notifications on Slack. Slack bot tokens start with 'xoxb'.
     alertmanager.oauth.slack.token={{ .Values.configVars.alertmanager.oauth.slack.token }}
+
+    # Enable the Google Chat app, for choosing spaces and people to mention in Google Chat alert notifications.
+    # Credentials are read from alertmanager.googlechat.credentials-file if set, else from Application Default Credentials.
+    # See https://cloud.google.com/docs/authentication/application-default-credentials
+    alertmanager.googlechat.app-enabled={{ .Values.configVars.alertmanager.googlechat.appEnabled }}
+
+    # Path to credentials json of the service account of a Google Chat app. Used only if alertmanager.googlechat.app-enabled is set.
+    # Accepts a service account key, an impersonated service account or a workload identity federation config.
+    # See https://developers.google.com/workspace/chat/authenticate-authorize-chat-app
+    {{- if .Values.configVars.alertmanager.googlechat.credentialsExistingSecret }}
+    alertmanager.googlechat.credentials-file=/etc/cubeapm-secrets/googlechat/googlechat_credentials.json
+    {{- else }}
+    #alertmanager.googlechat.credentials-file=
+    {{- end }}
 
     # Name of the site for sending alert notifications on Jira. If you access Jira on https://youraccountid.atlassian.net, the site name is youraccountid.
     alertmanager.jira.site-name={{ .Values.configVars.alertmanager.jira.siteName }}
@@ -158,6 +186,13 @@ data:
 
     # Disable the built-in demo trace generator
     tracegen.disable={{ .Values.configVars.tracegen.disable }}
+
+    # Directory containing archived logs
+    {{- if .Values.configVars.logs.archive.enabled }}
+    logs.archive.dir=/var/lib/cubeapm/logs_archive
+    {{- else }}
+    #logs.archive.dir=
+    {{- end }}
 
     # The number of concurrent workers. 0 means equal to number of available CPUs.
     logs.backup.concurrency={{ .Values.configVars.logs.backup.concurrency }}
@@ -221,12 +256,8 @@ data:
     # Logs retention period. Must be at least 24h.
     logs.retention={{ .Values.configVars.logs.retention }}
 
-    # Directory to store archived logs.
-    {{- if .Values.configVars.logs.archive.enabled }}
-    logs.archive.dir=/var/lib/cubeapm/logs_archive
-    {{- else }}
-    #logs.archive.dir=
-    {{- end }}
+    # Logs archive retention period. Must be at least 48h.
+    logs.archive.retention={{ .Values.configVars.logs.archive.retention }}
 
     # Metrics retention period. Must be at least 24h.
     metrics.retention={{ .Values.configVars.metrics.retention }}
@@ -234,8 +265,24 @@ data:
     # Traces retention period. Must be at least 24h.
     traces.retention={{ .Values.configVars.traces.retention }}
 
+    # Profiles retention period. Must be at least 24h.
+    profiles.retention={{ .Values.configVars.profiles.retention }}
+
     # Static files (e.g. javascript source maps) retention period
     files.retention={{ .Values.configVars.files.retention }}
+
+    # Retention period for alert notification history (alert_logs table). Must be at least 24h.
+    alertmanager.alert-logs.retention={{ .Values.configVars.alertmanager.alertLogs.retention }}
+
+    # Retention period for SLO data (slo_data and uptime_data tables). Days older than this disappear from the SLO Data page. Must be at least 168h.
+    slo.data-retention={{ .Values.configVars.slo.dataRetention }}
+
+    # Path to config file for retention policies.
+    {{- if .Values.configVars.retention.configFile }}
+    retention.config-file=/etc/cubeapm/retention.yml
+    {{- else }}
+    #retention.config-file=
+    {{- end }}
 
     # Minimum query duration for labeling database queries as slow.
     traces.slow-query-threshold={{ .Values.configVars.traces.slowQueryThreshold }}
@@ -373,6 +420,9 @@ data:
     # Disable charts in alert notifications
     alertmanager.charts.disable={{ .Values.configVars.alertmanager.charts.disable }}
 
+    # Disable sample log in alert notifications
+    alertmanager.sample-log.disable={{ .Values.configVars.alertmanager.sampleLog.disable }}
+
 
 
     ## Advanced Parameters: Changing values of these parameters can impact CubeAPM performance adversely, hence these should not be changed without consultation with CubeAPM support team
@@ -434,6 +484,12 @@ data:
     # [Deprecated] Use env-tag instead.
     #collector.env-tag=cube.environment
 
+    # New Relic Browser Application Monitoring host to additionally forward data to, e.g., bam.nr-data.net
+    collector.nr.bam.forward.host={{ .Values.collector.nr.bam.forward.host }}
+
+    # Comma-separated list of browser app id to app name mappings. Each entry is applicationID=service[;env]
+    collector.nr.bam.map.app-ids={{ .Values.collector.nr.bam.map.appIds }}
+
     # Collect data that New Relic stores in Transaction table.
     collector.nr.collect-transaction-data={{ .Values.collector.nr.collectTransactionData }}
 
@@ -445,12 +501,21 @@ data:
     # Examples: "http://*.domain.com", "*"
     #collector.nr.cors.origins=*
 
+    # Disable logs forwarding in New Relic agents.
+    collector.nr.logs-forwarding-disable={{ .Values.collector.nr.logsForwardingDisable }}
+
+    # Do not save metrics sent by New Relic agents by default. Only select metrics will be saved if set to true, and all metrics will be saved if set to false.
+    collector.nr.skip-metrics={{ .Values.collector.nr.skipMetrics }}
+
     # Do not deny service to unsupported agent protocols. Provide best-effort service instead.
     collector.nr.skip-protocol-check={{ .Values.collector.nr.skipProtocolCheck }}
 
     # Comma separated list of allowed origins for CORS requests.
     # Examples: "http://*.domain.com", "*"
     collector.otlp.http.cors.origins={{ .Values.collector.otlp.http.cors.origins }}
+
+    # Whether to disable sampling, i.e., save all traces.
+    collector.sampling.disable={{ .Values.collector.sampling.disable }}
 
     # Number of error traces to sample per sampling window (~5 minutes). The count is applied seperately for every service-api-error_type combination. Zero means dynamic sampling, which provides good performance while ensuring at least some samples of every kind of error are saved.
     #collector.sampling.error-count=0
@@ -493,31 +558,35 @@ data:
 
     # Compatibility mode for integration using Datadog agent.
     # Possible values are legacy, modern
-    #metrics.dd.compatibility-mode=modern
+    metrics.dd.compatibility-mode={{ .Values.configVars.metrics.datadog.compatibilityMode }}
 
     # Operation mode for downsampler. Downsampler periodically creates compressed copies of apm metrics. This speeds up apm queries over longer time ranges.
     # Possible values are off, on, backfill-YYYY-MM-DD
     #metrics.downsampler.mode=on
 
+    # Path to Credentials json for Google Cloud Platform.
+    # See https://cloud.google.com/docs/authentication/application-default-credentials
+    {{- if .Values.configVars.metrics.gcp.applicationCredentialsExistingSecret }}
+    metrics.gcp.application-credentials-file=/etc/cubeapm-secrets/gcp/gcp_credentials.json
+    {{- else }}
+    #metrics.gcp.application-credentials-file=
+    {{- end }}
+
     # Whether to enable infrastructure correlation.
     #metrics.infra-correlation.enable=false
 
     # Compatibility mode for integration using New Relic agent.
-    # Possible values are legacy, modern
+    # Possible values are legacy, v2, modern
     metrics.nr.compatibility-mode={{ .Values.configVars.metrics.newrelic.compatibilityMode }}
 
     # Whether to forward data received from New Relic agent to New Relic as well.
-    #metrics.nr.forwarder.enable=false
+    metrics.nr.forwarder.enable={{ .Values.configVars.metrics.newrelic.forwarder.enable }}
+
+    # Comma-separated list of services to forward to New Relic when metrics.nr.forwarder.enable is true. Each entry is service[;env[;accountID]] - env defaults to UNSET, and an entry without accountID matches the service in every account. Empty forwards all services.
+    metrics.nr.forwarder.services={{ .Values.configVars.metrics.newrelic.forwarder.services }}
 
     # Whether to perfer HTTP status code description as error description in the reported metrics. By default, exception name is preferred and HTTP status code description is used if no exception occured.
     #metrics.prefer-http-status-as-error-desc=false
-
-    # Path to config file for SLOs (Service Level Objectives).
-    {{- if .Values.configVars.metrics.slo.configFile }}
-    metrics.slo.config-file=/etc/cubeapm/slo.yml
-    {{- else }}
-    #metrics.slo.config-file=
-    {{- end }}
 
     # Whether to treat HTTP 4xx response as error in the reported metrics.
     #metrics.treat-4xx-as-error=false
@@ -527,13 +596,6 @@ data:
 
     # Replication factor assumed while querying.
     #query.replication-factor=1
-
-    # Path to config file for retention policies.
-    {{- if .Values.configVars.retention.configFile }}
-    retention.config-file=/etc/cubeapm/retention.yml
-    {{- else }}
-    #retention.config-file=
-    {{- end }}
 
     # Delay before shutdown. During this delay, health check returns non-OK responses so load balancers can route new requests to other servers.
     shutdown-delay={{ .Values.configVars.shutdownDelay }}
